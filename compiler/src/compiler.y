@@ -196,13 +196,13 @@
 		|	F			{ 	}
 		|	'(' expr ')'		{  			}
 
-		|	expr '+' expr 		{ 						}
-		|	expr '-' expr	 	{ 						}
-		|	expr '*' expr 		{ 			}
-		|	expr '/' expr 		{ 					}
-		|	expr '%' expr 		{ 						}
-		|	expr '<' expr		{ 						}
-		|	expr '>' expr		{ 						}
+		|	expr '+' expr 		{ $$ = $1 + $3;	}
+		|	expr '-' expr	 	{ $$ = $1 - $3}
+    | expr '*' expr { $$ = $1 * $3; }
+    | expr '/' expr { $$ = $1 / $3; }
+    | expr '%' expr { $$ = $1 % $3; }
+    | expr '<' expr { $$ = $1 < $3; }
+    | expr '>' expr { $$ = $1 > $3; }
 		|	expr GREATERTHANOREQUAL expr				{ 						}
 		|	expr LESSTHANOREQUAL expr	{  						}
 		|	expr NOTEQUAL expr			{ 						}
