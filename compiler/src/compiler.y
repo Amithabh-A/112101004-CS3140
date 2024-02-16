@@ -196,13 +196,13 @@
 		|	F			{ 	}
 		|	'(' expr ')'		{  			}
 
-		|	expr '+' expr 		{ $$ = $1 + $3;	}
-		|	expr '-' expr	 	{ $$ = $1 - $3}
-    | expr '*' expr { $$ = $1 * $3; }
-    | expr '/' expr { $$ = $1 / $3; }
-    | expr '%' expr { $$ = $1 % $3; }
-    | expr '<' expr { $$ = $1 < $3; }
-    | expr '>' expr { $$ = $1 > $3; }
+		|	expr '+' expr {Node node; $$ = node.oprNode(ADD, $1, $3);}
+		|	expr '-' expr	{Node node; $$ = node.oprNode(SUB, $1, $3);}
+    | expr '*' expr {Node node; $$ = node.oprNode(MUL, $1, $3);}
+    | expr '/' expr {Node node; $$ = node.oprNode(DIV, $1, $3);}
+    | expr '%' expr {}
+    | expr '<' expr {}
+    | expr '>' expr {}
 		|	expr GREATERTHANOREQUAL expr				{ 						}
 		|	expr LESSTHANOREQUAL expr	{  						}
 		|	expr NOTEQUAL expr			{ 						}
