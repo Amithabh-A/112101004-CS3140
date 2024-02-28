@@ -1,0 +1,10 @@
+begindecl 
+  integer a,b,c,d,e;
+enddecl
+
+a = 10;
+b = 20;
+c = a * b;
+d = a - b;
+e = c + d;
+print(a, b, c, d, e);

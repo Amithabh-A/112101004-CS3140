@@ -44,11 +44,10 @@ unordered_map<char*, int>symbol_table;
 
 %%
 
-	Prog	:	Gdecl_sec stmt_list // Fdef_sec MainBlock
-		;
-
+	Prog	:	Gdecl_sec stmt_list // Fdef_sec MainBlock		;
+        {cout<<"In Prog\n";}
 		
-	Gdecl_sec:	DECL Gdecl_list ENDDECL{}
+	Gdecl_sec:	DECL Gdecl_list ENDDECL{cout<<"in global definition section\n";}
 		;
 		
 	Gdecl_list: 
@@ -63,6 +62,7 @@ unordered_map<char*, int>symbol_table;
 		
 	Glist 	:	Gid
              {
+                cout<<"Gid\n";
                 // here just a variable is being written, make that a node. 
                 node *newNode = new node();
                 newNode->Type = declaration;
@@ -75,6 +75,7 @@ unordered_map<char*, int>symbol_table;
 // 		| 	func 
 		|	Gid ',' Glist 
       {
+                cout<<"Gid : Glist\n";
                 node *newNode = new node();
                 newNode->Type = declaration;
                 newNode->value = UNDEFINED;

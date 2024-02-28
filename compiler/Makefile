@@ -1,10 +1,11 @@
-all: ./src/lex.yy.c ./src/compiler.cc
-	g++ ./src/lex.yy.c ./src/compiler.cc -o ./bin/compiler
+all: ./src/compiler.cc ./lex.yy.c 
+	g++ lex.yy.c ./src/compiler.cc -o ./bin/compiler
 
 lex.yy.c: ./src/compiler.l
-	flex ./src/compiler.l
+	flex ./src/compiler.l 
+	mv lex.yy.c src/
 
-compiler.cc: ./src/compiler.y
+src/compiler.cc: ./src/compiler.y
 	bison -d ./src/compiler.y -o ./src/compiler.cc;
 
 clean:

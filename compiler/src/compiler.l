@@ -16,6 +16,15 @@ digit	[0-9]
 letter	[a-zA-Z]
 
 %%
+begindecl	
+  {
+    cout<<"I am detecting begindecl \n";
+    return  DECL;
+	}
+enddecl
+  {
+    return ENDDECL;
+  }
 print
   {
     return WRITE;
@@ -31,10 +40,11 @@ print
     yylval.Node->name = strdup(yytext);
     return VAR;
   }
-[-+()=/*\n] { return *yytext; }
+[-+()=/*] { return *yytext; }
 ["]                             { }
 "\\n"                           {
                                 }
+\n
 
 [ \t]				
 .				{

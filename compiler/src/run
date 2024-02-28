@@ -1,0 +1,4 @@
+clear
+yacc -d compiler.y -o compiler.cc
+lex compiler.l
+g++ lex.yy.c compiler.cc -o compiler
