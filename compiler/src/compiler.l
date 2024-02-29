@@ -5,8 +5,10 @@
 #include<cstring>
 #include "compiler.hh"
 #include "../include/compiler.h"
+#include<iostream>
 void yyerror(char *);
 char c;
+extern node* createVarNode(char* s);
 //int 	Lineno;
 //int     wflag;
 %}
@@ -16,17 +18,16 @@ digit	[0-9]
 letter	[a-zA-Z]
 
 %%
-begindecl	
-  {
-    cout<<"I am detecting begindecl \n";
+begindecl {
     return  DECL;
 	}
-enddecl
-  {
+enddecl {
     return ENDDECL;
   }
-print
-  {
+integer {
+    return T_INT;
+  }
+print {
     return WRITE;
   }
 {digit}+  { 	
@@ -37,7 +38,13 @@ print
 
 {letter}({letter}|{digit})*	{ 	
 //     yylval.s = strdup(yytext);
-    yylval.Node->name = strdup(yytext);
+    cout<<"here.\n";
+//    char* hello = strdup(yytext) + sizeof(char);
+//    hello[strlen(hello)-2]='\0'; 
+//    cout<<"made strdup. ";
+//    yylval.Node->name = hello;
+    yylval.Node = createVarNode(strdup(yytext));
+    cout<<"added var name in yylval\n";
     return VAR;
   }
 [-+()=/*] { return *yytext; }
