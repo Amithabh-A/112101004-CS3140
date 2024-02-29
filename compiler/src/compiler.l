@@ -8,7 +8,6 @@
 #include<iostream>
 void yyerror(char *);
 char c;
-extern node* createVarNode(char* s);
 //int 	Lineno;
 //int     wflag;
 %}
@@ -22,6 +21,7 @@ begindecl {
     return  DECL;
 	}
 enddecl {
+    cout<<"enddecl in lex\n";
     return ENDDECL;
   }
 integer {
@@ -38,16 +38,15 @@ print {
 
 {letter}({letter}|{digit})*	{ 	
 //     yylval.s = strdup(yytext);
-    cout<<"here.\n";
 //    char* hello = strdup(yytext) + sizeof(char);
 //    hello[strlen(hello)-2]='\0'; 
 //    cout<<"made strdup. ";
 //    yylval.Node->name = hello;
-    yylval.Node = createVarNode(strdup(yytext));
-    cout<<"added var name in yylval\n";
+    yylval.Node = (node*)malloc(sizeof(node)); 
+    yylval.Node -> name = strdup(yytext);
     return VAR;
   }
-[-+()=/*] { return *yytext; }
+[-+()=/*;,] { return *yytext; }
 ["]                             { }
 "\\n"                           {
                                 }

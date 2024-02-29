@@ -25,14 +25,3 @@ typedef struct node{
     
   }
 }node;
-
-node* createVarNode(char* s)
-{
-  node* varNode = (node*)malloc(sizeof(node));
-  varNode -> Type = assign;
-  varNode -> name = s;
-  varNode -> lt = NULL;
-  varNode -> rt = NULL;
-  varNode -> next = NULL;
-  return varNode;
-}

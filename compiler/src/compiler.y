@@ -4,15 +4,13 @@
 #include<cstring>
 #include<unordered_map>
 #include "../include/compiler.h"
-#define UNDEFINED INT_MIN
+#define UNDEFINED 2
 using namespace std;
 int yylex();
 void yyerror( char* );
-unordered_map<char*, int>symbol_table;
+unordered_map<string, int>symbol_table;
 %}
 %union{
-  int val;
-  char* s;
   struct node* Node;
 }
 %token VAR NUM WRITE
@@ -39,6 +37,7 @@ unordered_map<char*, int>symbol_table;
 %type<Node> var_expr
 %type<Node> Glist
 %type<Node> Gid
+%type<Node> str_expr
 // below line might be shitty. Sorry
 
 
@@ -47,14 +46,22 @@ unordered_map<char*, int>symbol_table;
 	Prog	:	Gdecl_sec stmt_list // Fdef_sec MainBlock		;
         {cout<<"In Prog\n";}
 		
-	Gdecl_sec:	DECL Gdecl_list ENDDECL{cout<<"in global definition section\n";}
+	Gdecl_sec:	DECL Gdecl_list ENDDECL {
+        
+        cout<<"in global definition section. Is this printed stmt? \n";
+                for(auto it : symbol_table) {
+                  cout<<"hi\n";
+                  cout<<it.first<<" "<<it.second<<"\n";
+                }
+                cout<<"finished symbol table reading. \n";
+      }
 		;
 		
 	Gdecl_list: 
 		| 	Gdecl Gdecl_list
 		;
 		
-	Gdecl 	:	ret_type Glist ';'
+  Gdecl 	:	ret_type Glist ';'
 		;
 		
 	ret_type:	T_INT		{ }
@@ -62,8 +69,8 @@ unordered_map<char*, int>symbol_table;
 		
 	Glist 	:	Gid
              {
-                cout<<"Gid\n";
                 // here just a variable is being written, make that a node. 
+                cout<<"declaration stmt\n";
                 node *newNode = new node();
                 newNode->Type = declaration;
                 newNode->value = UNDEFINED;
@@ -71,11 +78,12 @@ unordered_map<char*, int>symbol_table;
                 newNode->lt = NULL;
                 newNode->rt = NULL;
                 newNode->next = NULL;
+                $$ = newNode; 
              }
 // 		| 	func 
 		|	Gid ',' Glist 
       {
-                cout<<"Gid : Glist\n";
+                cout<<"declaration stmt\n";
                 node *newNode = new node();
                 newNode->Type = declaration;
                 newNode->value = UNDEFINED;
@@ -83,6 +91,7 @@ unordered_map<char*, int>symbol_table;
                 newNode->lt = NULL;
                 newNode->rt = NULL;
                 newNode->next = $3;
+                $$ = newNode;
       }
 // 		|	func ',' Glist
 		;
@@ -164,25 +173,23 @@ unordered_map<char*, int>symbol_table;
 		|	error ';' 		{  }
 		;
 
-	statement:	assign_stmt  ';'		{ 							 }
-		|	read_stmt ';'		{ }
+	statement:	assign_stmt  ';'	{}	
+		|	read_stmt ';'		{ cout<<"others\n"; }
 		|	write_stmt ';'		{ }
-		|	cond_stmt 		{ }
-		|	func_stmt ';'		{ }
+		|	cond_stmt 		{ cout<<"others\n";}
+		|	func_stmt ';'		{ cout<<"others\n";}
 		;
 
-	read_stmt:	READ '(' var_expr ')' {						 }
+	read_stmt:	READ '(' var_expr ')' {						 
 		;
+  }
 
 	write_stmt:	WRITE '(' expr ')'
         {
-          node *newNode = new node();
-          newNode->Type = print;
-          newNode->value = $3->value;
-          newNode->name = NULL;
-          newNode->lt = NULL;
-          newNode->rt = NULL;
-          newNode->next = NULL;
+          $3->Type = print;
+          $3->value = symbol_table[$3->name];
+          cout<<symbol_table[$3->name];
+          $$ = $3;
         }
 		 | WRITE '(''"' str_expr '"'')'      { }
 
@@ -190,9 +197,7 @@ unordered_map<char*, int>symbol_table;
 	
 	assign_stmt:	var_expr '=' expr
     {
-  // VAR = NUM : store in symbol table. 
-      // node *newNode = node(NULL, );
-      // $$ = $3; // assignment stmt returns value of assignment stmt because x=y=3 : y=3 returns 3 -> so x=3 can be evaluated. 
+          cout<<$3->value<<"\n";
           symbol_table[$1->name] = $3->value;
           node *newNode = new node();
           newNode->Type = assign;
@@ -201,7 +206,11 @@ unordered_map<char*, int>symbol_table;
           newNode->lt = $1;
           newNode->rt = $3;
           newNode->next = NULL;
-          $$ = newNode;
+          //$$ = newNode;
+          //      for(auto it : symbol_table) {
+          //        cout<<"hi\n";
+          //        cout<<it.first<<" "<<it.second<<"\n";
+          //      }
         }
 		;
 
@@ -265,7 +274,7 @@ unordered_map<char*, int>symbol_table;
         {
           node *newNode = new node();
           newNode->Type = add;
-          newNode->value = ($1->value)+($3->value);
+          newNode->value = symbol_table[$1->name] + symbol_table[$3->name];
           newNode->name = NULL;
           newNode->lt = $1;
           newNode->rt = $3;
@@ -319,8 +328,23 @@ unordered_map<char*, int>symbol_table;
 		|	func_call		{  }
 */
 		;
-	str_expr :  VAR                       {}
-                  | str_expr VAR   { }
+	str_expr :  VAR                      
+                {
+                  $1->Type = print;
+                  $1->value = symbol_table[$1->name];
+                  cout<<symbol_table[$1->name]<<"\n";
+                  $$ = $1;
+                }
+                  | str_expr VAR   
+                      {
+                        $2->Type = print;
+                        $2->value = symbol_table[$2->name];
+                        cout<<symbol_table[$2->name]<<"\n" ;
+                        node *temp = $1->next;
+                        $1->next = $2;
+                        $2->next = temp;
+                        $$ = $1;
+                      }
                 ;
 	
 	var_expr:	VAR	
