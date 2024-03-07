@@ -21,7 +21,6 @@ begindecl {
     return  DECL;
 	}
 enddecl {
-    cout<<"enddecl in lex\n";
     return ENDDECL;
   }
 integer {
@@ -37,11 +36,6 @@ print {
 				  }
 
 {letter}({letter}|{digit})*	{ 	
-//     yylval.s = strdup(yytext);
-//    char* hello = strdup(yytext) + sizeof(char);
-//    hello[strlen(hello)-2]='\0'; 
-//    cout<<"made strdup. ";
-//    yylval.Node->name = hello;
     yylval.Node = (node*)malloc(sizeof(node)); 
     yylval.Node -> name = strdup(yytext);
     return VAR;

@@ -13,7 +13,7 @@ unordered_map<string, int>symbol_table;
 %union{
   struct node* Node;
 }
-%token VAR NUM WRITE
+%token<Node> VAR NUM WRITE
 %token BEG END
 %token T_INT T_BOOL
 %token READ 
@@ -29,15 +29,14 @@ unordered_map<string, int>symbol_table;
 %nonassoc UMINUS
 
 // %type identifies type of non terminals
-%type<Node> NUM
-%type<Node> VAR
 %type<Node> expr
 %type<Node> assign_stmt
 %type<Node> write_stmt
 %type<Node> var_expr
 %type<Node> Glist
+%type<Node> Wlist
 %type<Node> Gid
-%type<Node> str_expr
+%type<Node> Wid
 // below line might be shitty. Sorry
 
 
@@ -45,15 +44,9 @@ unordered_map<string, int>symbol_table;
 
 	Prog	:	Gdecl_sec stmt_list // Fdef_sec MainBlock		;
         {cout<<"In Prog\n";}
+  ;
 		
 	Gdecl_sec:	DECL Gdecl_list ENDDECL {
-        
-        cout<<"in global definition section. Is this printed stmt? \n";
-                for(auto it : symbol_table) {
-                  cout<<"hi\n";
-                  cout<<it.first<<" "<<it.second<<"\n";
-                }
-                cout<<"finished symbol table reading. \n";
       }
 		;
 		
@@ -70,7 +63,6 @@ unordered_map<string, int>symbol_table;
 	Glist 	:	Gid
              {
                 // here just a variable is being written, make that a node. 
-                cout<<"declaration stmt\n";
                 node *newNode = new node();
                 newNode->Type = declaration;
                 newNode->value = UNDEFINED;
@@ -80,10 +72,8 @@ unordered_map<string, int>symbol_table;
                 newNode->next = NULL;
                 $$ = newNode; 
              }
-// 		| 	func 
 		|	Gid ',' Glist 
       {
-                cout<<"declaration stmt\n";
                 node *newNode = new node();
                 newNode->Type = declaration;
                 newNode->value = UNDEFINED;
@@ -93,21 +83,20 @@ unordered_map<string, int>symbol_table;
                 newNode->next = $3;
                 $$ = newNode;
       }
-// 		|	func ',' Glist
 		;
 	
 	Gid	:	VAR		{ 				}
 		|	Gid '[' NUM ']'	{                                                   }
 
 		;
-		
+
 	func 	:	VAR '(' arg_list ')' 					{ 					}
 		;
 			
 	arg_list:	
 		|	arg_list1
 		;
-		
+
 	arg_list1:	arg_list1 ';' arg
 		|	arg
 		;
@@ -175,29 +164,46 @@ unordered_map<string, int>symbol_table;
 
 	statement:	assign_stmt  ';'	{}	
 		|	read_stmt ';'		{ cout<<"others\n"; }
-		|	write_stmt ';'		{ }
+		|	write_stmt ';'		{ cout<<"write stmt\n"; }
 		|	cond_stmt 		{ cout<<"others\n";}
 		|	func_stmt ';'		{ cout<<"others\n";}
 		;
 
 	read_stmt:	READ '(' var_expr ')' {						 
-		;
   }
+  ;
 
-	write_stmt:	WRITE '(' expr ')'
+  write_stmt: WRITE '(' Wlist ')' ';' 
+  ;
+
+  Wlist : Wid 
         {
-          $3->Type = print;
-          $3->value = symbol_table[$3->name];
-          cout<<symbol_table[$3->name];
-          $$ = $3;
+          $1->Type = print;
+          $1->value = symbol_table[$1->name];
+          cout<<symbol_table[$1->name]<<"\n";
+          $$ = $1;
         }
-		 | WRITE '(''"' str_expr '"'')'      { }
+        
+  | Wid ',' Wlist
+        {
+          $1->Type = print;
+          $1->value = symbol_table[$1->name];
+          cout<<symbol_table[$1->name]<<"\n";
+          $1->next = $3;
+          $$ = $1;
+        }
+  ;
+
+	Wid	:	VAR		{ 				}
+		|	Wid '[' NUM ']'	{ }
 
 		;
+		
+
+
 	
 	assign_stmt:	var_expr '=' expr
-    {
-          cout<<$3->value<<"\n";
+        {
           symbol_table[$1->name] = $3->value;
           node *newNode = new node();
           newNode->Type = assign;
@@ -206,11 +212,6 @@ unordered_map<string, int>symbol_table;
           newNode->lt = $1;
           newNode->rt = $3;
           newNode->next = NULL;
-          //$$ = newNode;
-          //      for(auto it : symbol_table) {
-          //        cout<<"hi\n";
-          //        cout<<it.first<<" "<<it.second<<"\n";
-          //      }
         }
 		;
 
@@ -274,7 +275,7 @@ unordered_map<string, int>symbol_table;
         {
           node *newNode = new node();
           newNode->Type = add;
-          newNode->value = symbol_table[$1->name] + symbol_table[$3->name];
+          newNode->value = $1->value + $3->value;
           newNode->name = NULL;
           newNode->lt = $1;
           newNode->rt = $3;
@@ -307,7 +308,10 @@ unordered_map<string, int>symbol_table;
         {
           node *newNode = new node();
           newNode->Type = Div;
-          newNode->value = ($1->value)/($3->value);
+          cout<<"before /\n";
+          newNode->value = (int)(($1->value)/($3->value));
+          cout<<newNode->value<<"\n";
+          cout<<"after /\n";
           newNode->name = NULL;
           newNode->lt = $1;
           newNode->rt = $3;
@@ -315,43 +319,17 @@ unordered_map<string, int>symbol_table;
           $$ = newNode;
         }
 
-/*    |	expr '%' expr 		{ 						}
-		|	expr '<' expr		{ 						}
-		|	expr '>' expr		{ 						}
-		|	expr GREATERTHANOREQUAL expr				{ 						}
-		|	expr LESSTHANOREQUAL expr	{  						}
-		|	expr NOTEQUAL expr			{ 						}
-		|	expr EQUALEQUAL expr	{ 						}
-		|	LOGICAL_NOT expr	{ 						}
-		|	expr LOGICAL_AND expr	{ 						}
-		|	expr LOGICAL_OR expr	{ 						}
-		|	func_call		{  }
-*/
 		;
-	str_expr :  VAR                      
-                {
-                  $1->Type = print;
-                  $1->value = symbol_table[$1->name];
-                  cout<<symbol_table[$1->name]<<"\n";
-                  $$ = $1;
-                }
-                  | str_expr VAR   
-                      {
-                        $2->Type = print;
-                        $2->value = symbol_table[$2->name];
-                        cout<<symbol_table[$2->name]<<"\n" ;
-                        node *temp = $1->next;
-                        $1->next = $2;
-                        $2->next = temp;
-                        $$ = $1;
-                      }
-                ;
 	
 	var_expr:	VAR	
       {
         node *newNode = new node();
         newNode->Type = declaration;
-        newNode->value = UNDEFINED;
+        if(symbol_table.find($1->name) != symbol_table.end())
+        {
+          newNode->value = symbol_table[$1->name];
+        }
+        else newNode->value = UNDEFINED;
         newNode->name = $1->name;
         newNode->lt = NULL;
         newNode->rt = NULL;
@@ -372,12 +350,3 @@ yyparse();
 // ----------------------------------
 /*
 */
-/*
-%left '<' '>'
-%left EQUALEQUAL LESSTHANOREQUAL GREATERTHANOREQUAL NOTEQUAL
-%left '%'
-%left LOGICAL_AND LOGICAL_OR
-%left LOGICAL_NOT
-*/
-// ----------------------------------
-
