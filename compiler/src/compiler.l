@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string>
 #include<cstring>
-#include "compiler.hh"
+#include "../include/compiler.hh"
 #include "../include/compiler.h"
 #include<iostream>
 void yyerror(char *);
