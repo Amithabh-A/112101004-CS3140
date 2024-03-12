@@ -4,10 +4,10 @@ clear :
 	clear
 
 yacc : 
-	yacc -d compiler.y -o compiler.cc
+	bison -d compiler.y -o compiler.cc
 
 lex : 
-	lex compiler.l
+	flex compiler.l
 
 compile : 
 	clang++ -g -std=c++17 lex.yy.c compiler.cc -o compiler

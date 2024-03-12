@@ -3,12 +3,18 @@
 #include<string>
 #include<cstring>
 #include<unordered_map>
+#include<vector>
 #include "../include/compiler.h"
 #define UNDEFINED 2
 using namespace std;
 int yylex();
 void yyerror( char* );
 unordered_map<string, int>symbol_table;
+vector<const node*>statement_list;
+
+void printStatement(node* statement);
+void printTree(vector<const node*> statement_list);
+
 %}
 %union{
   struct node* Node;
@@ -30,6 +36,7 @@ unordered_map<string, int>symbol_table;
 
 // %type identifies type of non terminals
 %type<Node> expr
+%type<Node> statement
 %type<Node> assign_stmt
 %type<Node> write_stmt
 %type<Node> var_expr
@@ -43,7 +50,7 @@ unordered_map<string, int>symbol_table;
 %%
 
 	Prog	:	Gdecl_sec stmt_list // Fdef_sec MainBlock		;
-        {cout<<"In Prog\n";}
+//        {cout<<"In Prog\n";}
   ;
 		
 	Gdecl_sec:	DECL Gdecl_list ENDDECL {
@@ -55,6 +62,11 @@ unordered_map<string, int>symbol_table;
 		;
 		
   Gdecl 	:	ret_type Glist ';'
+//      {
+//        cout<<"Gdecl\n";
+//        statement_list.push_back($2);
+//            for(auto it : statement_list)cout<<it->Type<<" ";cout<<"\n";
+//      }
 		;
 		
 	ret_type:	T_INT		{ }
@@ -158,30 +170,66 @@ unordered_map<string, int>symbol_table;
 		;
 
 	stmt_list:	/* NULL */		{  }
-		|	statement stmt_list	{						}
-		|	error ';' 		{  }
+		|	statement stmt_list	
+//          {		
+//            cout<<"stmt end\n";				
+//          }
+		|	error ';' 	//	{ cout<<"error end \n"; }
 		;
 
-	statement:	assign_stmt  ';'	{}	
-		|	read_stmt ';'		{ cout<<"others\n"; }
-		|	write_stmt ';'		{ cout<<"write stmt\n"; }
-		|	cond_stmt 		{ cout<<"others\n";}
-		|	func_stmt ';'		{ cout<<"others\n";}
+	statement:	assign_stmt  ';'	
+          {
+            $$ = $1;
+            statement_list.push_back($1);
+//             for(auto it : statement_list)cout<<it->Type<<" ";cout<<"\n";
+          }	
+		|	read_stmt ';'	//	{ cout<<"read_stmt end\n"; }
+		|	write_stmt ';'		
+          { 
+//            cout<<"write stmt end\n"; 
+            $$ = $1;
+            statement_list.push_back($1);
+//             for(auto it : statement_list)cout<<it->Type<<" ";cout<<"\n";
+            auto temp = $1;
+ //           cout<<"printing variables in write stmt";
+//
+//            // This test is for testing whether a node is pointing to itself
+//            // testcase is single assign and single print of a. 
+//
+//            if(temp->next == temp) {
+//              cout<<"ERROR : node pointing to itself!!\n Check print. ";
+//              exit(1);
+//            }
+
+
+            while(temp != NULL)
+            {
+              cout<<temp->name<<" ";
+              temp = temp->next;
+            }
+            cout<<"\n";
+          }
+		|	cond_stmt 		// { cout<<"cond_stmt end\n";}
+		|	func_stmt ';'		// { cout<<"func_stmt end\n";}
 		;
 
 	read_stmt:	READ '(' var_expr ')' {						 
   }
   ;
 
-  write_stmt: WRITE '(' Wlist ')' ';' 
+  write_stmt: WRITE '(' Wlist ')' {// cout<<"write_stmt inside end\n";
+     $$ = $3;
+    }
   ;
 
   Wlist : Wid 
         {
+//           cout<<"entered Wid\n";
           $1->Type = print;
           $1->value = symbol_table[$1->name];
           cout<<symbol_table[$1->name]<<"\n";
           $$ = $1;
+//           cout<<"exiting Wid\n";
         }
         
   | Wid ',' Wlist
@@ -212,6 +260,7 @@ unordered_map<string, int>symbol_table;
           newNode->lt = $1;
           newNode->rt = $3;
           newNode->next = NULL;
+          $$ = newNode;
         }
 		;
 
@@ -308,10 +357,15 @@ unordered_map<string, int>symbol_table;
         {
           node *newNode = new node();
           newNode->Type = Div;
-          cout<<"before /\n";
+//           cout<<"before /\n";
+          if($3->value == 0)
+          {
+            cout<<"ZeroDivisionError\n";
+            exit(1);
+          }
           newNode->value = (int)(($1->value)/($3->value));
-          cout<<newNode->value<<"\n";
-          cout<<"after /\n";
+//           cout<<newNode->value<<"\n";
+//           cout<<"after /\n";
           newNode->name = NULL;
           newNode->lt = $1;
           newNode->rt = $3;
@@ -343,8 +397,47 @@ void yyerror ( char  *s) {
    fprintf (stderr, "%s\n", s);
  }
 
+void printTree(vector<const node*> statement_list)
+{
+  vector<const node*>reversed_statement_list = statement_list;
+//  reverse(reversed_statement_list.begin(), reversed_statement_list.end());
+  int count = 0;
+  for(auto it : reversed_statement_list)
+  {
+    if (it->Type == assign){ 
+        cout<<"ASSIGN ";
+        cout<<it->name<<" "<<it->value<<"\n";
+    }
+    else if(it->Type == print){ 
+        cout<<"CALL print ";
+        auto temp = it;
+
+        while(temp != NULL)
+        {
+          cout<<temp->name<<" ";
+          temp = temp->next;
+        }
+        cout<<"\n";
+    }
+    else if(it->Type == declaration) { 
+        cout<<"DECLARATION ";
+        auto temp1 = it;
+        
+        while(temp1 != NULL)
+        {
+          cout<<temp1->name<<" ";
+          temp1 = temp1->next;
+        }
+        cout<<"\n";
+    }
+
+  }
+//   cout<<statement_list.size()<<"\n";
+}
+
 int main(){
 yyparse();
+printTree(statement_list);
 }
 
 // ----------------------------------

@@ -8,8 +8,6 @@
 #include<iostream>
 void yyerror(char *);
 char c;
-//int 	Lineno;
-//int     wflag;
 %}
 
 %option noyywrap

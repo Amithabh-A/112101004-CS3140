@@ -1,14 +1,14 @@
 using namespace std;
 
 typedef enum type{
+  assign, 
+  print,
+  declaration,
+
   add, 
   sub, 
   mul, 
   Div,
-
-  assign, 
-  print,
-  declaration,
 
   constant
 }type;
@@ -25,3 +25,4 @@ typedef struct node{
     
   }
 }node;
+
