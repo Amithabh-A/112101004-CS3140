@@ -4,6 +4,7 @@ typedef enum type{
   assign, 
   print,
   declaration,
+  condition,
 
   add, 
   sub, 
@@ -20,9 +21,15 @@ typedef struct node{
   node *lt;
   node *rt;
   node *next;
+  
+  
+  node *expr;
+  node *ifTrue;
+  node *ifFalse;
 
   node(){
-    
+//    *ifTrue = NULL;
+//    *ifFalse= NULL;
   }
 }node;
 

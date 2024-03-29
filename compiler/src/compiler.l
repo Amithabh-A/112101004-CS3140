@@ -27,6 +27,18 @@ integer {
 print {
     return WRITE;
   }
+if				{
+    return IF; 
+				}
+then				{
+    return THEN;
+					}	
+else				{
+    return ELSE;
+					}	
+endif				{
+    return ENDIF;
+				}
 {digit}+  { 	
 //             yylval.val = atoi(yytext);
             yylval.Node->value = atoi(yytext);

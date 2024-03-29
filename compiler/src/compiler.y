@@ -5,15 +5,15 @@
 #include<unordered_map>
 #include<vector>
 #include "../include/compiler.h"
-#define UNDEFINED 2
+#define UNDEFINED INT_MAX
 using namespace std;
 int yylex();
 void yyerror( char* );
 unordered_map<string, int>symbol_table;
-vector<const node*>statement_list;
+vector<const node*>stmt_list;
 
 void printStatement(node* statement);
-void printTree(vector<const node*> statement_list);
+void printTree(vector<const node*> stmt_list);
 
 %}
 %union{
@@ -36,9 +36,10 @@ void printTree(vector<const node*> statement_list);
 
 // %type identifies type of non terminals
 %type<Node> expr
-%type<Node> statement
-%type<Node> assign_stmt
-%type<Node> write_stmt
+%type<Node> statement 
+%type<Node> stmt_list
+%type<Node> cond_stmt
+%type<Node> assign_stmt  write_stmt read_stmt func_stmt
 %type<Node> var_expr
 %type<Node> Glist
 %type<Node> Wlist
@@ -64,8 +65,8 @@ void printTree(vector<const node*> statement_list);
   Gdecl 	:	ret_type Glist ';'
 //      {
 //        cout<<"Gdecl\n";
-//        statement_list.push_back($2);
-//            for(auto it : statement_list)cout<<it->Type<<" ";cout<<"\n";
+//        stmt_list.push_back($2);
+//            for(auto it : stmt_list)cout<<it->Type<<" ";cout<<"\n";
 //      }
 		;
 		
@@ -82,6 +83,8 @@ void printTree(vector<const node*> statement_list);
                 newNode->lt = NULL;
                 newNode->rt = NULL;
                 newNode->next = NULL;
+                newNode->ifTrue = NULL;
+                newNode->ifFalse = NULL;
                 $$ = newNode; 
              }
 		|	Gid ',' Glist 
@@ -92,6 +95,8 @@ void printTree(vector<const node*> statement_list);
                 newNode->name = $1->name;
                 newNode->lt = NULL;
                 newNode->rt = NULL;
+                newNode->ifTrue = NULL;
+                newNode->ifFalse = NULL;
                 newNode->next = $3;
                 $$ = newNode;
       }
@@ -174,22 +179,21 @@ void printTree(vector<const node*> statement_list);
 //          {		
 //            cout<<"stmt end\n";				
 //          }
-		|	error ';' 	//	{ cout<<"error end \n"; }
+		//|	error ';' 	//	{ cout<<"error end \n"; }
 		;
 
 	statement:	assign_stmt  ';'	
           {
             $$ = $1;
-            statement_list.push_back($1);
-//             for(auto it : statement_list)cout<<it->Type<<" ";cout<<"\n";
+            stmt_list.push_back($1);
+//             for(auto it : stmt_list)cout<<it->Type<<" ";cout<<"\n";
           }	
 		|	read_stmt ';'	//	{ cout<<"read_stmt end\n"; }
 		|	write_stmt ';'		
           { 
-//            cout<<"write stmt end\n"; 
             $$ = $1;
-            statement_list.push_back($1);
-//             for(auto it : statement_list)cout<<it->Type<<" ";cout<<"\n";
+            stmt_list.push_back($1);
+//             for(auto it : stmt_list)cout<<it->Type<<" ";cout<<"\n";
             auto temp = $1;
  //           cout<<"printing variables in write stmt";
 //
@@ -209,7 +213,7 @@ void printTree(vector<const node*> statement_list);
             }
             cout<<"\n";
           }
-		|	cond_stmt 		// { cout<<"cond_stmt end\n";}
+		|	cond_stmt 	 { cout<<"cond_stmt end\n";}
 		|	func_stmt ';'		// { cout<<"func_stmt end\n";}
 		;
 
@@ -260,12 +264,34 @@ void printTree(vector<const node*> statement_list);
           newNode->lt = $1;
           newNode->rt = $3;
           newNode->next = NULL;
+          newNode->ifTrue = NULL;
+          newNode->ifFalse = NULL;
           $$ = newNode;
         }
 		;
 
-	cond_stmt:	IF expr THEN stmt_list ENDIF 	{ 						}
-		|	IF expr THEN stmt_list ELSE stmt_list ENDIF 	{ 						}
+	cond_stmt:	IF expr THEN '{'stmt_list'}' ENDIF 	
+        {  
+          cout<<"in if expr\n";
+          node *newNode = new node();
+          newNode->Type = condition;
+          newNode->next = NULL;
+          newNode->ifTrue = $5;
+          newNode->ifFalse = NULL;
+          $$ = newNode;
+          cout<<"going out of if expr\n";
+        }
+		|	IF expr THEN '{'stmt_list'}' ELSE '{'stmt_list'}' ENDIF 
+        { 						
+          cout<<"in if else expr\n";
+          node *newNode = new node();
+          newNode->Type = condition;
+          newNode->next = NULL;
+          newNode->ifTrue = $5;
+          newNode->ifFalse = $9;
+          $$ = newNode;
+          cout<<"going out of if else expr\n";
+        }
 	        |    FOR '(' assign_stmt  ';'  expr ';'  assign_stmt ')' '{' stmt_list '}'                                             {                                                 }
 		;
 	
@@ -297,6 +323,8 @@ void printTree(vector<const node*> statement_list);
           newNode->lt = NULL;
           newNode->rt = NULL;
           newNode->next = NULL;
+          newNode->ifTrue = NULL;
+          newNode->ifFalse = NULL;
           $$ = newNode;
         }
 		|	'-' NUM	%prec UMINUS
@@ -310,6 +338,8 @@ void printTree(vector<const node*> statement_list);
           newNode->lt = NULL;
           newNode->rt = NULL;
           newNode->next = NULL;
+          newNode->ifTrue = NULL;
+          newNode->ifFalse = NULL;
           $$ = newNode;
         }
 		|	var_expr	//	{}
@@ -329,6 +359,8 @@ void printTree(vector<const node*> statement_list);
           newNode->lt = $1;
           newNode->rt = $3;
           newNode->next = NULL;
+          newNode->ifTrue = NULL;
+          newNode->ifFalse = NULL;
           $$ = newNode;
         }
 		|	expr '-' expr
@@ -340,6 +372,8 @@ void printTree(vector<const node*> statement_list);
           newNode->lt = $1;
           newNode->rt = $3;
           newNode->next = NULL;
+          newNode->ifTrue = NULL;
+          newNode->ifFalse = NULL;
           $$ = newNode;
         }
 		|	expr '*' expr
@@ -351,6 +385,8 @@ void printTree(vector<const node*> statement_list);
           newNode->lt = $1;
           newNode->rt = $3;
           newNode->next = NULL;
+          newNode->ifTrue = NULL;
+          newNode->ifFalse = NULL;
           $$ = newNode;
         }
 		|	expr '/' expr
@@ -370,6 +406,8 @@ void printTree(vector<const node*> statement_list);
           newNode->lt = $1;
           newNode->rt = $3;
           newNode->next = NULL;
+          newNode->ifTrue = NULL;
+          newNode->ifFalse = NULL;
           $$ = newNode;
         }
 
@@ -388,6 +426,8 @@ void printTree(vector<const node*> statement_list);
         newNode->lt = NULL;
         newNode->rt = NULL;
         newNode->next = NULL;
+        newNode->ifTrue = NULL;
+        newNode->ifFalse = NULL;
         $$ = newNode;
       }
 		|	var_expr '[' expr ']'	{                                                 }
@@ -397,12 +437,12 @@ void yyerror ( char  *s) {
    fprintf (stderr, "%s\n", s);
  }
 
-void printTree(vector<const node*> statement_list)
+void printTree(vector<const node*> stmt_list)
 {
-  vector<const node*>reversed_statement_list = statement_list;
-//  reverse(reversed_statement_list.begin(), reversed_statement_list.end());
+  vector<const node*>reversed_stmt_list = stmt_list;
+//  reverse(reversed_stmt_list.begin(), reversed_stmt_list.end());
   int count = 0;
-  for(auto it : reversed_statement_list)
+  for(auto it : reversed_stmt_list)
   {
     if (it->Type == assign){ 
         cout<<"ASSIGN ";
@@ -430,14 +470,13 @@ void printTree(vector<const node*> statement_list)
         }
         cout<<"\n";
     }
-
   }
-//   cout<<statement_list.size()<<"\n";
+//   cout<<stmt_list.size()<<"\n";
 }
 
 int main(){
 yyparse();
-printTree(statement_list);
+printTree(stmt_list);
 }
 
 // ----------------------------------

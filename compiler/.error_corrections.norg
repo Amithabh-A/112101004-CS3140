@@ -1,0 +1,10 @@
+@code cpp
+	stmt_list:	/* NULL */		{  }
+		|	statement stmt_list	
+//          {		
+//            cout<<"stmt end\n";				
+//          }
+		//|	error ';' 	//	{ cout<<"error end \n"; }
+		;
+@end
+here I have commented out error. Could be a potential bug. 
