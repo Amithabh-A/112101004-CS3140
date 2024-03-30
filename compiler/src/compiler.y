@@ -17,6 +17,62 @@ vector<const node*>stmt_list;
 void printStatement(node* statement);
 void printTree(vector<const node*> stmt_list);
 
+node* createNode(type Type, int value, const char* name, node* leftTree, node* rightTree, node* next) {
+    node *newNode = new node();
+    newNode->Type = Type;
+    newNode->value = value;
+    newNode->name = name ? strdup(name) : NULL; // strdup - str dup - string duplicate fn in c. Ensure deep copy of name
+    // NOTE : NULL is used with pointer data types only. 
+    // If value is not being assigned, we will just assign it with UNDEFINED. 
+    newNode->lt = leftTree;
+    newNode->rt = rightTree;
+    newNode->next = next;
+    newNode->ifTrue = NULL;
+    newNode->ifFalse = NULL;
+    return newNode;
+}
+
+int getSymbolValue(const string& name) { // just taking string reference, avoiding copy. 
+    if(symbol_table.find(name) != symbol_table.end()) {
+        return symbol_table[name];
+    } else {
+        cout << "Error: Undefined symbol '" << name << "'." << endl;
+        return UNDEFINED; // Consider how you want to handle undefined symbols
+    }
+}
+
+void setSymbolValue(const string& name, int value) {
+    symbol_table[name] = value;
+}
+
+void printNode(const node* node) {
+    if (!node) return;
+    switch (node->Type) {
+        case assign:
+            cout << "ASSIGN " << node->name << " " << node->value << "\n";
+            break;
+        case print:
+            cout << "CALL print ";
+            while (node != NULL) {
+                cout << node->name << " ";
+                node = node->next;
+            }
+            cout << "\n";
+            break;
+        case declaration:
+            cout << "DECLARATION ";
+            while (node != NULL) {
+                cout << node->name << " ";
+                node = node->next;
+            }
+            cout << "\n";
+            break;
+        // Add cases for other types as needed
+        default:
+            cout << "Unknown node type\n";
+    }
+}
+
 %}
 %union{
   struct node* Node;
@@ -73,34 +129,16 @@ void printTree(vector<const node*> stmt_list);
 		;
 		
 	ret_type:	T_INT		{ }
+    | T_BOOL { }
 		;
 		
 	Glist 	:	Gid
              {
-                // here just a variable is being written, make that a node. 
-                node *newNode = new node();
-                newNode->Type = declaration;
-                newNode->value = UNDEFINED;
-                newNode->name = $1->name;
-                newNode->lt = NULL;
-                newNode->rt = NULL;
-                newNode->next = NULL;
-                newNode->ifTrue = NULL;
-                newNode->ifFalse = NULL;
-                $$ = newNode; 
+                $$ = createNode(declaration, UNDEFINED, $1->name, NULL, NULL, NULL);
              }
 		|	Gid ',' Glist 
       {
-                node *newNode = new node();
-                newNode->Type = declaration;
-                newNode->value = UNDEFINED;
-                newNode->name = $1->name;
-                newNode->lt = NULL;
-                newNode->rt = NULL;
-                newNode->ifTrue = NULL;
-                newNode->ifFalse = NULL;
-                newNode->next = $3;
-                $$ = newNode;
+                $$ = createNode(declaration, UNDEFINED, $1->name, NULL, NULL, $3);
       }
 		;
 	
@@ -232,8 +270,8 @@ void printTree(vector<const node*> stmt_list);
         {
 //           cout<<"entered Wid\n";
           $1->Type = print;
-          $1->value = symbol_table[$1->name];
-          cout<<symbol_table[$1->name]<<"\n";
+          $1->value = getSymbolValue($1->name);
+          cout<<getSymbolValue($1->name)<<"\n";
           $$ = $1;
 //           cout<<"exiting Wid\n";
         }
@@ -241,8 +279,8 @@ void printTree(vector<const node*> stmt_list);
   | Wid ',' Wlist
         {
           $1->Type = print;
-          $1->value = symbol_table[$1->name];
-          cout<<symbol_table[$1->name]<<"\n";
+          $1->value = getSymbolValue($1->name);
+          cout<<getSymbolValue($1->name)<<"\n";
           $1->next = $3;
           $$ = $1;
         }
@@ -258,40 +296,24 @@ void printTree(vector<const node*> stmt_list);
 	
 	assign_stmt:	var_expr '=' expr
         {
-          symbol_table[$1->name] = $3->value;
-          node *newNode = new node();
-          newNode->Type = assign;
-          newNode->value = $3->value;
-          newNode->name = $1->name;
-          newNode->lt = $1;
-          newNode->rt = $3;
-          newNode->next = NULL;
-          newNode->ifTrue = NULL;
-          newNode->ifFalse = NULL;
-          $$ = newNode;
+          setSymbolValue($1->name, $3->value);
+          $$ = createNode(assign, $3->value, $1->name, $1, $3, NULL);
         }
 		;
 
 	cond_stmt:	IF expr THEN '{'stmt_list'}' ENDIF 	
         {  
           cout<<"in if expr\n";
-          node *newNode = new node();
-          newNode->Type = condition;
-          newNode->next = NULL;
-          newNode->ifTrue = $5;
-          newNode->ifFalse = NULL;
-          $$ = newNode;
+          $$ = createNode(condition, 0, NULL, NULL, NULL, NULL);
+          $$->ifTrue = $5;
           cout<<"going out of if expr\n";
         }
 		|	IF expr THEN '{'stmt_list'}' ELSE '{'stmt_list'}' ENDIF 
         { 						
           cout<<"in if else expr\n";
-          node *newNode = new node();
-          newNode->Type = condition;
-          newNode->next = NULL;
-          newNode->ifTrue = $5;
-          newNode->ifFalse = $9;
-          $$ = newNode;
+          $$ = createNode(condition, 0, NULL, NULL, NULL, NULL);
+          $$->ifTrue = $5;
+          $$->ifFalse = $9;
           cout<<"going out of if else expr\n";
         }
 	        |    FOR '(' assign_stmt  ';'  expr ';'  assign_stmt ')' '{' stmt_list '}'                                             {                                                 }
@@ -316,35 +338,15 @@ void printTree(vector<const node*> stmt_list);
 
 	expr	:	NUM 
       { 
-          node *newNode = new node();
-          newNode->Type = constant;
-          newNode->value = $1->value;
-          newNode->name = NULL;
-          newNode->lt = NULL;
-          newNode->rt = NULL;
-          newNode->next = NULL;
-          newNode->ifTrue = NULL;
-          newNode->ifFalse = NULL;
-          $$ = newNode;
+          $$ = createNode(constant, $1->value, NULL, NULL, NULL, NULL);
         }
 		|	'-' NUM	%prec UMINUS
       { 
-        // node *newNode = node(constant,-1*($2->value));
-        // $$ = newNode; 
-          node *newNode = new node();
-          newNode->Type = constant;
-          newNode->value = (-1)*$2->value;
-          newNode->name = NULL;
-          newNode->lt = NULL;
-          newNode->rt = NULL;
-          newNode->next = NULL;
-          newNode->ifTrue = NULL;
-          newNode->ifFalse = NULL;
-          $$ = newNode;
+          $$ = createNode(constant, (-1)*$2->value, NULL, NULL, NULL, NULL);
         }
 		|	var_expr	//	{}
-//		|	T			{ 						  	}
-//		|	F			{ 	}
+		|	T			{ 						  	}
+		|	F			{ 	}
 		|	'(' expr ')'		
       { 
         $$ = $2; 
@@ -352,83 +354,31 @@ void printTree(vector<const node*> stmt_list);
 
 		|	expr '+' expr 
         {
-          node *newNode = new node();
-          newNode->Type = add;
-          newNode->value = $1->value + $3->value;
-          newNode->name = NULL;
-          newNode->lt = $1;
-          newNode->rt = $3;
-          newNode->next = NULL;
-          newNode->ifTrue = NULL;
-          newNode->ifFalse = NULL;
-          $$ = newNode;
+          $$ = createNode(add, $1->value + $3->value, NULL, $1, $3, NULL);
         }
 		|	expr '-' expr
         {
-          node *newNode = new node();
-          newNode->Type = sub;
-          newNode->value = ($1->value)-($3->value);
-          newNode->name = NULL;
-          newNode->lt = $1;
-          newNode->rt = $3;
-          newNode->next = NULL;
-          newNode->ifTrue = NULL;
-          newNode->ifFalse = NULL;
-          $$ = newNode;
+          $$ = createNode(sub, $1->value - $3->value, NULL, $1, $3, NULL);
         }
 		|	expr '*' expr
         {
-          node *newNode = new node();
-          newNode->Type = mul;
-          newNode->value = ($1->value)*($3->value);
-          newNode->name = NULL;
-          newNode->lt = $1;
-          newNode->rt = $3;
-          newNode->next = NULL;
-          newNode->ifTrue = NULL;
-          newNode->ifFalse = NULL;
-          $$ = newNode;
+          $$ = createNode(mul, $1->value * $3->value, NULL, $1, $3, NULL);
         }
 		|	expr '/' expr
         {
-          node *newNode = new node();
-          newNode->Type = Div;
-//           cout<<"before /\n";
           if($3->value == 0)
           {
             cout<<"ZeroDivisionError\n";
             exit(1);
           }
-          newNode->value = (int)(($1->value)/($3->value));
-//           cout<<newNode->value<<"\n";
-//           cout<<"after /\n";
-          newNode->name = NULL;
-          newNode->lt = $1;
-          newNode->rt = $3;
-          newNode->next = NULL;
-          newNode->ifTrue = NULL;
-          newNode->ifFalse = NULL;
-          $$ = newNode;
+          $$ = createNode(Div, (int)($1->value / $3->value), NULL, $1, $3, NULL);
         }
 
 		;
 	
 	var_expr:	VAR	
       {
-        node *newNode = new node();
-        newNode->Type = declaration;
-        if(symbol_table.find($1->name) != symbol_table.end())
-        {
-          newNode->value = symbol_table[$1->name];
-        }
-        else newNode->value = UNDEFINED;
-        newNode->name = $1->name;
-        newNode->lt = NULL;
-        newNode->rt = NULL;
-        newNode->next = NULL;
-        newNode->ifTrue = NULL;
-        newNode->ifFalse = NULL;
-        $$ = newNode;
+        $$ = createNode(declaration, getSymbolValue($1->name), $1->name, NULL, NULL, NULL);
       }
 		|	var_expr '[' expr ']'	{                                                 }
 		;
@@ -439,39 +389,10 @@ void yyerror ( char  *s) {
 
 void printTree(vector<const node*> stmt_list)
 {
-  vector<const node*>reversed_stmt_list = stmt_list;
-//  reverse(reversed_stmt_list.begin(), reversed_stmt_list.end());
-  int count = 0;
-  for(auto it : reversed_stmt_list)
+  for(const auto& it : stmt_list)
   {
-    if (it->Type == assign){ 
-        cout<<"ASSIGN ";
-        cout<<it->name<<" "<<it->value<<"\n";
-    }
-    else if(it->Type == print){ 
-        cout<<"CALL print ";
-        auto temp = it;
-
-        while(temp != NULL)
-        {
-          cout<<temp->name<<" ";
-          temp = temp->next;
-        }
-        cout<<"\n";
-    }
-    else if(it->Type == declaration) { 
-        cout<<"DECLARATION ";
-        auto temp1 = it;
-        
-        while(temp1 != NULL)
-        {
-          cout<<temp1->name<<" ";
-          temp1 = temp1->next;
-        }
-        cout<<"\n";
-    }
+    printNode(it);
   }
-//   cout<<stmt_list.size()<<"\n";
 }
 
 int main(){

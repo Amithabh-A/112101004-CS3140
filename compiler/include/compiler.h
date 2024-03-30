@@ -11,7 +11,17 @@ typedef enum type{
   mul, 
   Div,
 
-  constant
+  constant,
+
+  eq,
+  le,
+  ge,
+  ne,
+
+  and,
+  or,
+  not
+
 }type;
 
 typedef struct node{
@@ -28,8 +38,5 @@ typedef struct node{
   node *ifFalse;
 
   node(){
-//    *ifTrue = NULL;
-//    *ifFalse= NULL;
   }
 }node;
-
