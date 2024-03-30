@@ -1,4 +1,6 @@
 %{	
+#define parse.error verbose
+#define YYDEBUG 1
 #include<iostream>
 #include<string>
 #include<cstring>
@@ -314,8 +316,6 @@ void printTree(vector<const node*> stmt_list);
 
 	expr	:	NUM 
       { 
-        // node *newNode = node(constant,$1->value);
-        // $$ = newNode; 
           node *newNode = new node();
           newNode->Type = constant;
           newNode->value = $1->value;
@@ -475,6 +475,8 @@ void printTree(vector<const node*> stmt_list)
 }
 
 int main(){
+extern int yydebug;
+yydebug = 1;
 yyparse();
 printTree(stmt_list);
 }

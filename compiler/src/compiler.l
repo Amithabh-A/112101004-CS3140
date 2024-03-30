@@ -50,6 +50,13 @@ endif				{
     yylval.Node -> name = strdup(yytext);
     return VAR;
   }
+"==" {return EQUALEQUAL;}
+"<=" {return LESSTHANOREQUAL;}
+">=" {return GREATERTHANOREQUAL;}
+"!=" {return NOTEQUAL;}
+"AND" {return LOGICAL_AND;}
+"OR" {return LOGICAL_OR;}
+"NOT" {return LOGICAL_NOT;}
 [-+()=/*;,] { return *yytext; }
 ["]                             { }
 "\\n"                           {
