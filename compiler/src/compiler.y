@@ -373,6 +373,16 @@ void printNode(const node* node) {
           }
           $$ = createNode(Div, (int)($1->value / $3->value), NULL, $1, $3, NULL);
         }
+		|	expr '%' expr 		{ 						}
+		|	expr '<' expr		{ 						}
+		|	expr '>' expr		{ 						}
+		|	expr GREATERTHANOREQUAL expr				{ 						}
+		|	expr LESSTHANOREQUAL expr	{  						}
+		|	expr NOTEQUAL expr			{ 						}
+		|	expr EQUALEQUAL expr	{ 						}
+		|	LOGICAL_NOT expr	{ 						}
+		|	expr LOGICAL_AND expr	{ 						}
+		|	expr LOGICAL_OR expr	{ 						}
 
 		;
 	
