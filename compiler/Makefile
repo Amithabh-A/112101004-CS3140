@@ -15,7 +15,9 @@ lex :
 compile : 
 	clang++ -g -std=c++17 src/lex.yy.c src/compiler.cc -o bin/compiler
 
-run : 
+run : clear execute
+
+execute : 
 	lldb ./bin/compiler
 
 clean : 

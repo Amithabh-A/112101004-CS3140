@@ -33,6 +33,7 @@ typedef struct node{
   node *lt;
   node *rt;
   node *next;
+  node *next_stmt;
   
   
   node *expr;

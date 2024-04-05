@@ -33,6 +33,8 @@ node* createNode(type Type, int value, const char* name, node* leftTree, node* r
     newNode->lt = leftTree;
     newNode->rt = rightTree;
     newNode->next = next;
+    newNode->expr = NULL;
+    newNode->next_stmt = NULL;
     newNode->ifTrue = NULL;
     newNode->ifFalse = NULL;
     return newNode;
@@ -74,6 +76,19 @@ void printNode(const node* node) {
             cout << "\n";
             break;
         // Add cases for other types as needed
+        case condition:
+          cout<<"\nCONDITIONAL\nLogical Expression start\n";
+          // Logical expression here
+          printNode(node->expr);
+          cout<<"Logical expression end\n If True, stmt_list here : \n";
+          // if stmt_list
+          printTree(node->ifTrue); 
+          cout<<"Over... \n Else stmt_list here: \n";
+          // else stmt_list
+          printTree(node->ifFalse); 
+          cout<<"CONDITIONAL block over\n\n"
+          
+
         default:
             cout << "Unknown node type\n";
     }
@@ -232,7 +247,6 @@ void printNode(const node* node) {
           {
             $$ = $1;
             stmt_list.push_back($1);
-//             for(auto it : stmt_list)cout<<it->Type<<" ";cout<<"\n";
           }	
 		|	read_stmt ';'	//	{ cout<<"read_stmt end\n"; }
 		|	write_stmt ';'		
@@ -253,6 +267,7 @@ void printNode(const node* node) {
           { 
             cout<<"cond_stmt end\n";
             $$ = $1;
+            $$->Type = condition;
             stmt_list.push_back($1);
           }
 		|	func_stmt ';'		// { cout<<"func_stmt end\n";}
@@ -302,19 +317,19 @@ void printNode(const node* node) {
         }
 		;
 
-	cond_stmt:	IF expr THEN '{'stmt_list'}' ENDIF 	
+	cond_stmt:	IF expr '{'stmt_list'}'
         {  
           cout<<"in if expr\n";
           $$ = createNode(condition, 0, NULL, NULL, NULL, NULL);
-          $$->ifTrue = $5;
+          $$->ifTrue = $4;
           cout<<"going out of if expr\n";
         }
-		|	IF expr THEN '{'stmt_list'}' ELSE '{'stmt_list'}' ENDIF 
+		|	IF expr '{'stmt_list'}' ELSE '{'stmt_list'}' 
         { 						
           cout<<"in if else expr\n";
           $$ = createNode(condition, 0, NULL, NULL, NULL, NULL);
-          $$->ifTrue = $5;
-          $$->ifFalse = $9;
+          $$->ifTrue = $4;
+          $$->ifFalse = $8;
           cout<<"going out of if else expr\n";
         }
 	        |    FOR '(' assign_stmt  ';'  expr ';'  assign_stmt ')' '{' stmt_list '}'                                             {                                                 }
@@ -429,13 +444,13 @@ void printTree(vector<const node*> stmt_list)
 {
   for(const auto& it : stmt_list)
   {
-    printNode(it);
+    printNode(it); 
   }
 }
 
 int main(){
 extern int yydebug;
-yydebug = 1;
+//yydebug = 1;
 yyparse();
 printTree(stmt_list);
 }
