@@ -57,7 +57,7 @@ endif				{
 "AND" {return LOGICAL_AND;}
 "OR" {return LOGICAL_OR;}
 "NOT" {return LOGICAL_NOT;}
-[-+()=/*;,] { return *yytext; }
+[-+()=/*;,\{\}] { return *yytext; }
 ["]                             { }
 "\\n"                           {
                                 }

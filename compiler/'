@@ -21,12 +21,6 @@ node* createNode(type Type, int value, const char* name, node* leftTree, node* r
     node *newNode = new node();
     newNode->Type = Type;
     newNode->value = value;
-
-    // This is a hack. Need a refactor in function. 
-    if(newNode->value != UNDEFINED && newNode->Type == declaration) {
-      newNode->Type = assign;
-    }
-
     newNode->name = name ? strdup(name) : NULL; // strdup - str dup - string duplicate fn in c. Ensure deep copy of name
     // NOTE : NULL is used with pointer data types only. 
     // If value is not being assigned, we will just assign it with UNDEFINED. 
@@ -239,8 +233,18 @@ void printNode(const node* node) {
           { 
             $$ = $1;
             stmt_list.push_back($1);
+//             for(auto it : stmt_list)cout<<it->Type<<" ";cout<<"\n";
             auto temp = $1;
-            // some comments deleted. Check commits in April 5. 
+ //           cout<<"printing variables in write stmt";
+//
+//            // This test is for testing whether a node is pointing to itself
+//            // testcase is single assign and single print of a. 
+//
+//            if(temp->next == temp) {
+//              cout<<"ERROR : node pointing to itself!!\n Check print. ";
+//              exit(1);
+//            }
+
 
             while(temp != NULL)
             {
@@ -249,12 +253,7 @@ void printNode(const node* node) {
             }
             cout<<"\n";
           }
-		|	cond_stmt 	 
-          { 
-            cout<<"cond_stmt end\n";
-            $$ = $1;
-            stmt_list.push_back($1);
-          }
+		|	cond_stmt 	 { cout<<"cond_stmt end\n";}
 		|	func_stmt ';'		// { cout<<"func_stmt end\n";}
 		;
 
@@ -340,7 +339,7 @@ void printNode(const node* node) {
 	expr	:	NUM 
       { 
           $$ = createNode(constant, $1->value, NULL, NULL, NULL, NULL);
-      }
+        }
 		|	'-' NUM	%prec UMINUS
       { 
           $$ = createNode(constant, (-1)*$2->value, NULL, NULL, NULL, NULL);

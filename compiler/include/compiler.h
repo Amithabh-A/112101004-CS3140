@@ -20,9 +20,9 @@ typedef enum type{
   gt,
   ne,
 
-  and,
-  or,
-  not
+  And,
+  Or,
+  Not
 
 }type;
 
