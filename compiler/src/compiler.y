@@ -373,16 +373,43 @@ void printNode(const node* node) {
           }
           $$ = createNode(Div, (int)($1->value / $3->value), NULL, $1, $3, NULL);
         }
-		|	expr '%' expr 		{ 						}
-		|	expr '<' expr		{ 						}
-		|	expr '>' expr		{ 						}
-		|	expr GREATERTHANOREQUAL expr				{ 						}
-		|	expr LESSTHANOREQUAL expr	{  						}
-		|	expr NOTEQUAL expr			{ 						}
-		|	expr EQUALEQUAL expr	{ 						}
-		|	LOGICAL_NOT expr	{ 						}
-		|	expr LOGICAL_AND expr	{ 						}
-		|	expr LOGICAL_OR expr	{ 						}
+// 		|	expr '%' expr 		{ 						}
+		|	expr '<' expr		
+        { 						
+          $$ = createNode(lt, $1->value < $3->value, NULL, $1, $3, NULL);
+        }
+		|	expr '>' expr		
+        { 						
+          $$ = createNode(gt, $1->value > $3->value, NULL, $1, $3, NULL);
+        }
+		|	expr GREATERTHANOREQUAL expr			
+        { 						
+          $$ = createNode(ge, $1->value >= $3->value, NULL, $1, $3, NULL);
+        }
+		|	expr LESSTHANOREQUAL expr	
+        { 						
+          $$ = createNode(le, $1->value <= $3->value, NULL, $1, $3, NULL);
+        }
+		|	expr NOTEQUAL expr		
+        { 						
+          $$ = createNode(ne, $1->value != $3->value, NULL, $1, $3, NULL);
+        }
+		|	expr EQUALEQUAL expr	
+        { 					
+          $$ = createNode(eq, $1->value == $3->value, NULL, $1, $3, NULL);
+        }
+		|	LOGICAL_NOT expr	
+        { 					
+          $$ = createNode(not, $2->value, NULL, $2, NULL, NULL);
+        }
+		|	expr LOGICAL_AND expr	
+        { 					
+          $$ = createNode(and, $1->value && $3->value, NULL, $1, $3, NULL);
+        }
+		|	expr LOGICAL_OR expr	
+        { 					
+          $$ = createNode(or, $1->value || $3->value, NULL, $1, $3, NULL);
+        }
 
 		;
 	

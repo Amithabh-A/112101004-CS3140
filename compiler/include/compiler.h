@@ -16,6 +16,8 @@ typedef enum type{
   eq,
   le,
   ge,
+  lt,
+  gt,
   ne,
 
   and,
