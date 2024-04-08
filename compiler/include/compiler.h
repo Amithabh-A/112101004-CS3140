@@ -1,14 +1,14 @@
 using namespace std;
 
-typedef enum type{
-  assign, 
+typedef enum type {
+  assign,
   print,
   declaration,
   condition,
 
-  add, 
-  sub, 
-  mul, 
+  add,
+  sub,
+  mul,
   Div,
 
   constant,
@@ -24,22 +24,20 @@ typedef enum type{
   Or,
   Not
 
-}type;
+} type;
 
-typedef struct node{
+typedef struct node {
   type Type;
   int value;
-  char* name; 
+  bool truthVal;
+  char *name;
   node *lt;
   node *rt;
   node *next;
-  node *next_stmt;
-  
-  
+
   node *expr;
   node *ifTrue;
   node *ifFalse;
 
-  node(){
-  }
-}node;
+  node() {}
+} node;

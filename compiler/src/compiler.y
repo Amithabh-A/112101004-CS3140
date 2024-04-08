@@ -12,12 +12,11 @@ using namespace std;
 int yylex();
 void yyerror( char* );
 unordered_map<string, int>symbol_table;
-vector<const node*>stmt_list;
+node *globalStatementList;
 
-void printStatement(node* statement);
-void printTree(vector<const node*> stmt_list);
+void printTree(node *stmt_list);
 
-node* createNode(type Type, int value, const char* name, node* leftTree, node* rightTree, node* next) {
+node* createNode(type Type, int value = UNDEFINED, const char* name = NULL, node* leftTree = NULL, node* rightTree = NULL, node* next = NULL, node* expr = NULL, node* ifTrue = NULL, node* ifFalse = NULL, bool truthVal = false) {
     node *newNode = new node();
     newNode->Type = Type;
     newNode->value = value;
@@ -33,10 +32,9 @@ node* createNode(type Type, int value, const char* name, node* leftTree, node* r
     newNode->lt = leftTree;
     newNode->rt = rightTree;
     newNode->next = next;
-    newNode->expr = NULL;
-    newNode->next_stmt = NULL;
-    newNode->ifTrue = NULL;
-    newNode->ifFalse = NULL;
+    newNode->expr = expr;
+    newNode->ifTrue = ifTrue;
+    newNode->ifFalse = ifFalse;
     return newNode;
 }
 
@@ -59,19 +57,29 @@ void printNode(const node* node) {
         case assign:
             cout << "ASSIGN " << node->name << " " << node->value << "\n";
             break;
-        case print:
+        case print: {
             cout << "CALL print ";
+            // int p = 1;
+            // cout<<p<<"\n";
             while (node != NULL) {
+                // cout<<p<<"\n";
+                // if(p > 10) 
+                //     break;
                 cout << node->name << " ";
-                node = node->next;
+                // if(node == node->rt)
+                //     cout<<"this is a benzene snake!\n";
+                // else cout<<"technically not a benzene snake!\n";
+                node = node->rt;
+                //p++;
             }
             cout << "\n";
             break;
+        }
         case declaration:
             cout << "DECLARATION ";
             while (node != NULL) {
                 cout << node->name << " ";
-                node = node->next;
+                node = node->rt;
             }
             cout << "\n";
             break;
@@ -86,8 +94,7 @@ void printNode(const node* node) {
           cout<<"Over... \n Else stmt_list here: \n";
           // else stmt_list
           printTree(node->ifFalse); 
-          cout<<"CONDITIONAL block over\n\n"
-          
+          cout<<"CONDITIONAL block over\n\n";
 
         default:
             cout << "Unknown node type\n";
@@ -130,6 +137,10 @@ void printNode(const node* node) {
 %%
 
 	Prog	:	Gdecl_sec stmt_list // Fdef_sec MainBlock		;
+      {
+        globalStatementList = $2;
+      }
+      
 //        {cout<<"In Prog\n";}
   ;
 		
@@ -142,11 +153,6 @@ void printNode(const node* node) {
 		;
 		
   Gdecl 	:	ret_type Glist ';'
-//      {
-//        cout<<"Gdecl\n";
-//        stmt_list.push_back($2);
-//            for(auto it : stmt_list)cout<<it->Type<<" ";cout<<"\n";
-//      }
 		;
 		
 	ret_type:	T_INT		{ }
@@ -155,11 +161,11 @@ void printNode(const node* node) {
 		
 	Glist 	:	Gid
              {
-                $$ = createNode(declaration, UNDEFINED, $1->name, NULL, NULL, NULL);
+                $$ = createNode(declaration, UNDEFINED, $1->name);
              }
 		|	Gid ',' Glist 
       {
-                $$ = createNode(declaration, UNDEFINED, $1->name, NULL, NULL, $3);
+                $$ = createNode(declaration, UNDEFINED, $1->name, NULL, $3);
       }
 		;
 	
@@ -236,39 +242,38 @@ void printNode(const node* node) {
 		;
 
 	stmt_list:	/* NULL */		{  }
-		|	statement stmt_list	
-//          {		
-//            cout<<"stmt end\n";				
-//          }
+    |	statement stmt_list	
+          {		
+            $1->next = $2;
+            $$ = $1;
+          }
 		//|	error ';' 	//	{ cout<<"error end \n"; }
 		;
 
 	statement:	assign_stmt  ';'	
           {
             $$ = $1;
-            stmt_list.push_back($1);
           }	
 		|	read_stmt ';'	//	{ cout<<"read_stmt end\n"; }
 		|	write_stmt ';'		
           { 
             $$ = $1;
-            stmt_list.push_back($1);
             auto temp = $1;
             // some comments deleted. Check commits in April 5. 
 
             while(temp != NULL)
             {
               cout<<temp->name<<" ";
-              temp = temp->next;
+              temp = temp->rt;
             }
             cout<<"\n";
           }
+
 		|	cond_stmt 	 
           { 
             cout<<"cond_stmt end\n";
             $$ = $1;
             $$->Type = condition;
-            stmt_list.push_back($1);
           }
 		|	func_stmt ';'		// { cout<<"func_stmt end\n";}
 		;
@@ -297,7 +302,7 @@ void printNode(const node* node) {
           $1->Type = print;
           $1->value = getSymbolValue($1->name);
           cout<<getSymbolValue($1->name)<<"\n";
-          $1->next = $3;
+          $1->rt = $3;
           $$ = $1;
         }
   ;
@@ -313,26 +318,19 @@ void printNode(const node* node) {
 	assign_stmt:	var_expr '=' expr
         {
           setSymbolValue($1->name, $3->value);
-          $$ = createNode(assign, $3->value, $1->name, $1, $3, NULL);
+          $$ = createNode(assign, $3->value, $1->name, $1, $3);
         }
 		;
 
 	cond_stmt:	IF expr '{'stmt_list'}'
         {  
-          cout<<"in if expr\n";
-          $$ = createNode(condition, 0, NULL, NULL, NULL, NULL);
-          $$->ifTrue = $4;
-          cout<<"going out of if expr\n";
+          $$ = createNode(condition, expr = $2, ifTrue = $4);
         }
 		|	IF expr '{'stmt_list'}' ELSE '{'stmt_list'}' 
         { 						
-          cout<<"in if else expr\n";
-          $$ = createNode(condition, 0, NULL, NULL, NULL, NULL);
-          $$->ifTrue = $4;
-          $$->ifFalse = $8;
-          cout<<"going out of if else expr\n";
+          $$ = createNode(condition, expr = $2, ifTrue = $4, ifFalse = $8);
         }
-	        |    FOR '(' assign_stmt  ';'  expr ';'  assign_stmt ')' '{' stmt_list '}'                                             {                                                 }
+    |    FOR '(' assign_stmt  ';'  expr ';'  assign_stmt ')' '{' stmt_list '}'                                             {                                                 }
 		;
 	
 	func_stmt:	func_call 		{ 						}
@@ -354,12 +352,12 @@ void printNode(const node* node) {
 
 	expr	:	NUM 
       { 
-          $$ = createNode(constant, $1->value, NULL, NULL, NULL, NULL);
+          $$ = createNode(constant, value = $1->value);
       }
 		|	'-' NUM	%prec UMINUS
       { 
-          $$ = createNode(constant, (-1)*$2->value, NULL, NULL, NULL, NULL);
-        }
+          $$ = createNode(constant, value = (-1)*$2->value);
+      }
 		|	var_expr	//	{}
 		|	T			{ 						  	}
 		|	F			{ 	}
@@ -370,15 +368,15 @@ void printNode(const node* node) {
 
 		|	expr '+' expr 
         {
-          $$ = createNode(add, $1->value + $3->value, NULL, $1, $3, NULL);
+          $$ = createNode(add, value = $1->value + $3->value, leftTree = $1, rightTree = $3);
         }
 		|	expr '-' expr
         {
-          $$ = createNode(sub, $1->value - $3->value, NULL, $1, $3, NULL);
+          $$ = createNode(sub, value = $1->value - $3->value, leftTree = $1, rightTree = $3);
         }
 		|	expr '*' expr
         {
-          $$ = createNode(mul, $1->value * $3->value, NULL, $1, $3, NULL);
+          $$ = createNode(mul, value = $1->value * $3->value, leftTree = $1, rightTree = $3);
         }
 		|	expr '/' expr
         {
@@ -387,51 +385,51 @@ void printNode(const node* node) {
             cout<<"ZeroDivisionError\n";
             exit(1);
           }
-          $$ = createNode(Div, (int)($1->value / $3->value), NULL, $1, $3, NULL);
+          $$ = createNode(Div, value = (int)($1->value / $3->value), leftTree = $1, rightTree = $3);
         }
 // 		|	expr '%' expr 		{ 						}
 		|	expr '<' expr		
         { 						
-          $$ = createNode(lt, $1->value < $3->value, NULL, $1, $3, NULL);
+          $$ = createNode(lt, truthVal = $1->value < $3->value, leftTree = $1, rightTree = $3);
         }
 		|	expr '>' expr		
         { 						
-          $$ = createNode(gt, $1->value > $3->value, NULL, $1, $3, NULL);
+          $$ = createNode(gt, truthVal = $1->value > $3->value, leftTree = $1, rightTree = $3);
         }
 		|	expr GREATERTHANOREQUAL expr			
         { 						
-          $$ = createNode(ge, $1->value >= $3->value, NULL, $1, $3, NULL);
+          $$ = createNode(ge, truthVal = $1->value >= $3->value, leftTree = $1, rightTree = $3);
         }
 		|	expr LESSTHANOREQUAL expr	
         { 						
-          $$ = createNode(le, $1->value <= $3->value, NULL, $1, $3, NULL);
+          $$ = createNode(le, truthVal = $1->value <= $3->value, leftTree = $1, rightTree = $3);
         }
 		|	expr NOTEQUAL expr		
         { 						
-          $$ = createNode(ne, $1->value != $3->value, NULL, $1, $3, NULL);
+          $$ = createNode(ne, truthVal = $1->value != $3->value, leftTree = $1, rightTree = $3);
         }
 		|	expr EQUALEQUAL expr	
         { 					
-          $$ = createNode(eq, $1->value == $3->value, NULL, $1, $3, NULL);
+          $$ = createNode(eq, truthVal = $1->value == $3->value, leftTree = $1, rightTree = $3);
         }
 		|	LOGICAL_NOT expr	
         { 					
-          $$ = createNode(Not, $2->value, NULL, $2, NULL, NULL);
+          $$ = createNode(Not, truthVal = !$2->value, rightTree = $2);
         }
 		|	expr LOGICAL_AND expr	
         { 					
-          $$ = createNode(And, $1->value && $3->value, NULL, $1, $3, NULL);
+          $$ = createNode(And, truthVal = $1->value && $3->value, leftTree = $1, rightTree = $3);
         }
 		|	expr LOGICAL_OR expr	
         { 					
-          $$ = createNode(Or, $1->value || $3->value, NULL, $1, $3, NULL);
+          $$ = createNode(Or, truthVal = $1->value || $3->value, leftTree = $1, rightTree = $3);
         }
 
 		;
 	
 	var_expr:	VAR	
       {
-        $$ = createNode(declaration, getSymbolValue($1->name), $1->name, NULL, NULL, NULL);
+        $$ = createNode(declaration, value = getSymbolValue($1->name), name = $1->name);
       }
 		|	var_expr '[' expr ']'	{                                                 }
 		;
@@ -440,19 +438,29 @@ void yyerror ( char  *s) {
    fprintf (stderr, "%s\n", s);
  }
 
-void printTree(vector<const node*> stmt_list)
+void printTree(node *stmt_list)
 {
-  for(const auto& it : stmt_list)
-  {
-    printNode(it); 
+  int k = 0;
+  node *temp = stmt_list;
+  while(temp != NULL) {
+    k++;
+    if(k == 15)
+      break;
+    printNode(temp);
+    temp = temp->next;
   }
+  free(temp);
+ //  for(const auto& it : stmt_list)
+ //  {
+ //    printNode(it); 
+ //  }
 }
 
 int main(){
 extern int yydebug;
 //yydebug = 1;
 yyparse();
-printTree(stmt_list);
+printTree(globalStatementList);
 }
 
 // ----------------------------------
