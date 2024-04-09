@@ -29,7 +29,7 @@ typedef enum type {
 typedef struct node {
   type Type;
   int value;
-  bool truthVal;
+  // bool truthVal;
   char *name;
   node *lt;
   node *rt;

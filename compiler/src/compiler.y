@@ -16,7 +16,7 @@ node *globalStatementList;
 
 void printTree(node *stmt_list);
 
-node* createNode(type Type, int value = UNDEFINED, const char* name = NULL, node* leftTree = NULL, node* rightTree = NULL, node* next = NULL, node* expr = NULL, node* ifTrue = NULL, node* ifFalse = NULL, bool truthVal = false) {
+node* createNode(type Type, int value = UNDEFINED, const char* name = NULL, node* leftTree = NULL, node* rightTree = NULL, node* next = NULL, node* expr = NULL, node* ifTrue = NULL, node* ifFalse = NULL) {
     node *newNode = new node();
     newNode->Type = Type;
     newNode->value = value;
@@ -324,11 +324,11 @@ void printNode(const node* node) {
 
 	cond_stmt:	IF expr '{'stmt_list'}'
         {  
-          $$ = createNode(condition, expr = $2, ifTrue = $4);
+          // $$ = createNode(condition, UNDEFINED, NULL, NULL, NULL, expr = $2, ifTrue = $4);
         }
 		|	IF expr '{'stmt_list'}' ELSE '{'stmt_list'}' 
         { 						
-          $$ = createNode(condition, expr = $2, ifTrue = $4, ifFalse = $8);
+          // $$ = createNode(condition, expr = $2, ifTrue = $4, ifFalse = $8);
         }
     |    FOR '(' assign_stmt  ';'  expr ';'  assign_stmt ')' '{' stmt_list '}'                                             {                                                 }
 		;
@@ -368,15 +368,15 @@ void printNode(const node* node) {
 
 		|	expr '+' expr 
         {
-          $$ = createNode(add, value = $1->value + $3->value, leftTree = $1, rightTree = $3);
+          $$ = createNode(add, value = $1->value + $3->value, name = NULL, leftTree = $1, rightTree = $3);
         }
 		|	expr '-' expr
         {
-          $$ = createNode(sub, value = $1->value - $3->value, leftTree = $1, rightTree = $3);
+          $$ = createNode(sub, value = $1->value - $3->value, name = NULL, leftTree = $1, rightTree = $3);
         }
 		|	expr '*' expr
         {
-          $$ = createNode(mul, value = $1->value * $3->value, leftTree = $1, rightTree = $3);
+          $$ = createNode(mul, value = $1->value * $3->value, name = NULL, leftTree = $1, rightTree = $3);
         }
 		|	expr '/' expr
         {
@@ -390,39 +390,39 @@ void printNode(const node* node) {
 // 		|	expr '%' expr 		{ 						}
 		|	expr '<' expr		
         { 						
-          $$ = createNode(lt, truthVal = $1->value < $3->value, leftTree = $1, rightTree = $3);
+        //   $$ = createNode(lt, truthVal = $1->value < $3->value, leftTree = $1, rightTree = $3);
         }
 		|	expr '>' expr		
         { 						
-          $$ = createNode(gt, truthVal = $1->value > $3->value, leftTree = $1, rightTree = $3);
+        //   $$ = createNode(gt, truthVal = $1->value > $3->value, leftTree = $1, rightTree = $3);
         }
 		|	expr GREATERTHANOREQUAL expr			
         { 						
-          $$ = createNode(ge, truthVal = $1->value >= $3->value, leftTree = $1, rightTree = $3);
+        //   $$ = createNode(ge, truthVal = $1->value >= $3->value, leftTree = $1, rightTree = $3);
         }
 		|	expr LESSTHANOREQUAL expr	
         { 						
-          $$ = createNode(le, truthVal = $1->value <= $3->value, leftTree = $1, rightTree = $3);
+        //   $$ = createNode(le, truthVal = $1->value <= $3->value, leftTree = $1, rightTree = $3);
         }
 		|	expr NOTEQUAL expr		
         { 						
-          $$ = createNode(ne, truthVal = $1->value != $3->value, leftTree = $1, rightTree = $3);
+        //   $$ = createNode(ne, truthVal = $1->value != $3->value, leftTree = $1, rightTree = $3);
         }
 		|	expr EQUALEQUAL expr	
         { 					
-          $$ = createNode(eq, truthVal = $1->value == $3->value, leftTree = $1, rightTree = $3);
+        //   $$ = createNode(eq, truthVal = $1->value == $3->value, leftTree = $1, rightTree = $3);
         }
 		|	LOGICAL_NOT expr	
         { 					
-          $$ = createNode(Not, truthVal = !$2->value, rightTree = $2);
+        //   $$ = createNode(Not, truthVal = !$2->value, rightTree = $2);
         }
 		|	expr LOGICAL_AND expr	
         { 					
-          $$ = createNode(And, truthVal = $1->value && $3->value, leftTree = $1, rightTree = $3);
+        //   $$ = createNode(And, truthVal = $1->value && $3->value, leftTree = $1, rightTree = $3);
         }
 		|	expr LOGICAL_OR expr	
         { 					
-          $$ = createNode(Or, truthVal = $1->value || $3->value, leftTree = $1, rightTree = $3);
+        //   $$ = createNode(Or, truthVal = $1->value || $3->value, leftTree = $1, rightTree = $3);
         }
 
 		;
