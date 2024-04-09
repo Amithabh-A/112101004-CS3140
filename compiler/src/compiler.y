@@ -352,11 +352,11 @@ void printNode(const node* node) {
 
 	expr	:	NUM 
       { 
-          $$ = createNode(constant, value = $1->value);
+          $$ = createNode(constant, $1->value);
       }
 		|	'-' NUM	%prec UMINUS
       { 
-          $$ = createNode(constant, value = (-1)*$2->value);
+          $$ = createNode(constant, (-1)*$2->value);
       }
 		|	var_expr	//	{}
 		|	T			{ 						  	}
@@ -368,15 +368,15 @@ void printNode(const node* node) {
 
 		|	expr '+' expr 
         {
-          $$ = createNode(add, value = $1->value + $3->value, name = NULL, leftTree = $1, rightTree = $3);
+          $$ = createNode(add, $1->value + $3->value, NULL, $1, $3, NULL);
         }
 		|	expr '-' expr
         {
-          $$ = createNode(sub, value = $1->value - $3->value, name = NULL, leftTree = $1, rightTree = $3);
+          $$ = createNode(sub, $1->value - $3->value, NULL, $1, $3, NULL);
         }
 		|	expr '*' expr
         {
-          $$ = createNode(mul, value = $1->value * $3->value, name = NULL, leftTree = $1, rightTree = $3);
+          $$ = createNode(mul, $1->value * $3->value, NULL, $1, $3, NULL);
         }
 		|	expr '/' expr
         {
@@ -385,7 +385,7 @@ void printNode(const node* node) {
             cout<<"ZeroDivisionError\n";
             exit(1);
           }
-          $$ = createNode(Div, value = (int)($1->value / $3->value), leftTree = $1, rightTree = $3);
+          $$ = createNode(Div, (int)($1->value / $3->value), NULL, $1, $3, NULL);
         }
 // 		|	expr '%' expr 		{ 						}
 		|	expr '<' expr		
@@ -429,7 +429,7 @@ void printNode(const node* node) {
 	
 	var_expr:	VAR	
       {
-        $$ = createNode(declaration, value = getSymbolValue($1->name), name = $1->name);
+        $$ = createNode(declaration, getSymbolValue($1->name), $1->name);
       }
 		|	var_expr '[' expr ']'	{                                                 }
 		;
