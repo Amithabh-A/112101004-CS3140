@@ -13,6 +13,7 @@ int yylex();
 void yyerror( char* );
 unordered_map<string, int>symbol_table;
 node *globalStatementList;
+set<node*>statementList;
 
 void printTree(node *stmt_list);
 
@@ -21,10 +22,11 @@ node* createNode(type Type, int value = UNDEFINED, const char* name = NULL, node
     newNode->Type = Type;
     newNode->value = value;
 
+    // might be a bug. 
     // This is a hack. Need a refactor in function. 
-    if(newNode->value != UNDEFINED && newNode->Type == declaration) {
-      newNode->Type = assign;
-    }
+    // if(newNode->value != UNDEFINED && newNode->Type == declaration) {
+    //   newNode->Type = assign;
+    // }
 
     newNode->name = name ? strdup(name) : NULL; // strdup - str dup - string duplicate fn in c. Ensure deep copy of name
     // NOTE : NULL is used with pointer data types only. 
@@ -35,6 +37,7 @@ node* createNode(type Type, int value = UNDEFINED, const char* name = NULL, node
     newNode->expr = expr;
     newNode->ifTrue = ifTrue;
     newNode->ifFalse = ifFalse;
+    cout<<Type<<" statement created. \n";
     return newNode;
 }
 
@@ -53,6 +56,7 @@ void setSymbolValue(const string& name, int value) {
 
 void printNode(const node* node) {
     if (!node) return;
+    insertStatementList(node);
     switch (node->Type) {
         case assign:
             cout << "ASSIGN " << node->name << " " << node->value << "\n";
@@ -145,6 +149,7 @@ void printNode(const node* node) {
   ;
 		
 	Gdecl_sec:	DECL Gdecl_list ENDDECL {
+
       }
 		;
 		
@@ -319,6 +324,7 @@ void printNode(const node* node) {
         {
           setSymbolValue($1->name, $3->value);
           $$ = createNode(assign, $3->value, $1->name, $1, $3);
+          cout<<"An assign node creation\n";
         }
 		;
 
@@ -444,25 +450,16 @@ void printTree(node *stmt_list)
   node *temp = stmt_list;
   while(temp != NULL) {
     k++;
-    if(k == 15)
-      break;
+    cout<<k<<"   type : "<<temp->Type;
     printNode(temp);
     temp = temp->next;
   }
   free(temp);
- //  for(const auto& it : stmt_list)
- //  {
- //    printNode(it); 
- //  }
 }
 
 int main(){
 extern int yydebug;
-//yydebug = 1;
+// yydebug = 1;
 yyparse();
 printTree(globalStatementList);
 }
-
-// ----------------------------------
-/*
-*/
