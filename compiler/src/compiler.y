@@ -60,40 +60,47 @@ void printNode(const node* node) {
     if (node == NULL) return;
     const struct node* temp;
     switch (node->Type) {
-        case assign:
-            cout << "ASSIGN " << node->name << " " << node->value << "\n";
+        case declarationStmt:
+            cout<<"DECLARATION ";
+            printNode(node->rt);
             break;
-        case print: {
-            cout << "CALL print ";
-            // int p = 1;
-            // cout<<p<<"\n";
+        case assignStmt:
+            cout<<"ASSIGN ";
+            printNode(node->rt);
+            break;
+        case printStmt:
+            cout<<"PRINT ";
+            printNode(node->rt);
+            break;
+
+
+        case declaration: {
             temp = node;
             while (temp != NULL) {
-                cout<<"1\n";
-                // cout<<p<<"\n";
-                // if(p > 10) 
-                //     break;
                 cout << temp->name << " ";
-                // if(node == node->rt)
-                //     cout<<"this is a benzene snake!\n";
-                // else cout<<"technically not a benzene snake!\n";
                 temp = temp->rt;
-                //p++;
+            }
+            cout << "\n";
+            break;
+
+
+        case assign:
+            cout <<node->name << " " << node->value << "\n"; 
+            break;
+
+
+        case print: {
+            temp = node;
+            while (temp != NULL) {
+                cout << temp->name << " ";
+                temp = temp->rt;
             }
             cout << "\n";
             break;
         }
-        case declaration: {
-            cout << "DECLARATION ";
-            temp = node;
-            while (temp != NULL) {
-                cout<<"2\n";
-                cout << temp->name << " ";
-                if(temp == temp->rt)cout<<"fail\n";
-                temp = temp->rt;
-            }
-            cout << "\n";
-            break;
+
+
+
         // Add cases for other types as needed
 //         case condition:
 //           cout<<"\nCONDITIONAL\nLogical Expression start\n";
@@ -147,8 +154,6 @@ void printNode(const node* node) {
 %type<Node> Gdecl_list
 %type<Node> Gdecl
 
-// below line might be shitty. Sorry
-
 
 %%
 
@@ -177,7 +182,7 @@ void printNode(const node* node) {
 		
   Gdecl 	:	ret_type Glist ';' {
     // currently only integer node. 
-    $$ = $2;
+    $$ = createNode(declarationStmt, UNDEFINED, NULL, NULL, $2);
   }
 		;
 		
@@ -274,21 +279,20 @@ void printNode(const node* node) {
           {		
             $1->next = $2;
             $$ = $1;
-            statement_list.push_back($1);
+            // statement_list.push_back($1);
           }
 		//|	error ';' 	//	{ cout<<"error end \n"; }
 		;
 
 	statement:	assign_stmt  ';'	
           {
-            $$ = $1;
+            $$ = createNode(assignStmt, UNDEFINED, NULL, NULL, $1);
           }	
 		|	read_stmt ';'	//	{ cout<<"read_stmt end\n"; }
 		|	write_stmt ';'		
           { 
-            $$ = createNode(printStmt);
-            $$ = $1;
-            node* temp = $1;
+            $$ = createNode(printStmt, UNDEFINED, NULL, NULL, $1);
+            // node* temp = $1;
             // some comments deleted. Check commits in April 5. 
 
             // while(temp != NULL)
@@ -312,25 +316,23 @@ void printNode(const node* node) {
   }
   ;
 
-  write_stmt: WRITE '(' Wlist ')' {// cout<<"write_stmt inside end\n";
-     $$ = $3;
+  write_stmt: WRITE '(' Wlist ')' 
+    {// cout<<"write_stmt inside end\n";
+      $$ = $3;
     }
   ;
 
   Wlist : Wid 
         {
-//           cout<<"entered Wid\n";
-          cout<<getSymbolValue($1->name)<<"\n";
+          // cout<<getSymbolValue($1->name)<<"\n";
           $$ = createNode(print, getSymbolValue($1->name), $1->name);
-//           cout<<"exiting Wid\n";
         }
         
   | Wid ',' Wlist
         {
-          $1->value = getSymbolValue($1->name);
-          cout<<getSymbolValue($1->name)<<"\n";
+          // $1->value = getSymbolValue($1->name);
+          // cout<<getSymbolValue($1->name)<<"\n";
           $$ = createNode(print, getSymbolValue($1->name), $1->name, NULL, $3);
-
         }
   ;
 
@@ -346,8 +348,8 @@ void printNode(const node* node) {
         {
           setSymbolValue($1->name, $3->value);
           $$ = createNode(assign, $3->value, $1->name, $1, $3);
-          cout<<$$<<" This is the address of node of assign stmt. \n";
-          cout<<"An assign node creation\n";
+          // cout<<$$<<" This is the address of node of assign stmt. \n";
+          // cout<<"An assign node creation\n";
         }
 		;
 
@@ -389,7 +391,8 @@ void printNode(const node* node) {
       }
 		|	var_expr		
       {
-        $$ = createNode(declaration, UNDEFINED, $1->name);
+        // $$ = createNode(declaration, UNDEFINED, $1->name);
+        $$ = $1;
       }
 		|	T			{ 						  	}
 		|	F			{ 	}
@@ -461,7 +464,7 @@ void printNode(const node* node) {
 	
 	var_expr:	VAR	
       {
-        $$ = createNode(declaration, getSymbolValue($1->name), $1->name);
+        $$ = createNode(declaration, UNDEFINED, $1->name);
       }
 		|	var_expr '[' expr ']'	{                                                 }
 		;
@@ -486,31 +489,73 @@ void printTree(node *stmt_list)
   free(temp);
 }
 
+// void printWholeTree(node* node){
+//   if(node == NULL){
+//     cout<<"null node! \n";
+//     return;
+//   }
+//   cout<<"Type : ";
+//   // <<node->Type<<"\n";
+//   switch(node->Type) {
+//     case assign:
+//       cout<<"assign type\n";
+//     case print:
+//       cout<<"print type\n";
+//     case declaration:
+//       cout<<"declaration type\n";
+//     default:
+//       cout<<"error\n";
+//   }
+//   cout<<"left \n";
+//   printWholeTree(node->lt);
+//   cout<<"left end\nright \n";
+//   printWholeTree(node->rt);
+//   cout<<"rightend\nnext statement \n";
+//   printWholeTree(node->next); 
+//   cout<<"nextStatementEnd\n";
+// }
+// 
 
-void printWholeTree(node* node){
-  if(node == NULL){
-    cout<<"null node! \n";
-    return;
-  }
-  cout<<"Type : ";
-  // <<node->Type<<"\n";
-  switch(node->Type) {
-    case assign:
-      cout<<"assign type\n";
-    case print:
-      cout<<"print type\n";
-    case declaration:
-      cout<<"declaration type\n";
-    default:
-      cout<<"error\n";
-  }
-  cout<<"left \n";
-  printWholeTree(node->lt);
-  cout<<"left end\nright \n";
-  printWholeTree(node->rt);
-  cout<<"rightend\nnext statement \n";
-  printWholeTree(node->next); 
-  cout<<"nextStatementEnd\n";
+void nodeImage(node* node){
+    if(node == NULL){
+        cout<<"nullvalue\n";
+        return;
+    }
+    cout<<"NODE ID : "<<node<<"\n";
+
+    cout<<"\n";
+    cout<<"Type : "<<node->Type<<"\nvalue: "<<node->value;
+
+    
+    if(node->name == NULL){
+        cout<<"name: NULL\n";
+    } else {
+      cout<<"\nname: "<< node->name<<"\n";
+    }
+
+
+    if(node->lt == NULL){
+        cout<<"lt: NULL\n";
+    } else {
+        cout<<"\nLeftTree : \n";
+        nodeImage(node->lt);
+    }
+
+    if(node->rt == NULL){
+        cout<<"rt: NULL\n";
+    } else {
+        cout<<"\nRightTree : \n";
+        nodeImage(node->rt);
+    }
+
+    if(node->next == NULL){
+        cout<<"next: NULL\n";
+    } else {
+        cout<<"\nNext : \n";
+        nodeImage(node->next);
+    }
+
+    cout<<"\n";
 }
 
 int main(){
@@ -518,7 +563,9 @@ extern int yydebug;
 // yydebug = 1;
 yyparse();
 cout<<"Size of statement list : "<<statement_list.size()<<"\n";
-cout<<"printWholeTree\n";
 cout<<"\n\n\nprintTree\n";
 printTree(globalStatementList);
+cout<<"\n\nInfix Traversal\n";
+if(globalStatementList == NULL)cout<<"haha\n root is null\n";
+nodeImage(globalStatementList);
 }
