@@ -6,6 +6,11 @@ typedef enum type {
   declaration,
   condition,
 
+  assignStmt,
+  printStmt,
+  declarationStmt,
+  conditionStmt,
+
   add,
   sub,
   mul,

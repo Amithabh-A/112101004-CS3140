@@ -13,12 +13,14 @@ int yylex();
 void yyerror( char* );
 unordered_map<string, int>symbol_table;
 node *globalStatementList;
-set<node*>statementList;
+vector<const node*>statement_list; 
 
 void printTree(node *stmt_list);
+void printWholeTree(node* stmt_list);
 
 node* createNode(type Type, int value = UNDEFINED, const char* name = NULL, node* leftTree = NULL, node* rightTree = NULL, node* next = NULL, node* expr = NULL, node* ifTrue = NULL, node* ifFalse = NULL) {
     node *newNode = new node();
+    cout<<newNode<<"\n";
     newNode->Type = Type;
     newNode->value = value;
 
@@ -55,8 +57,8 @@ void setSymbolValue(const string& name, int value) {
 }
 
 void printNode(const node* node) {
-    if (!node) return;
-    insertStatementList(node);
+    if (node == NULL) return;
+    const struct node* temp;
     switch (node->Type) {
         case assign:
             cout << "ASSIGN " << node->name << " " << node->value << "\n";
@@ -65,41 +67,46 @@ void printNode(const node* node) {
             cout << "CALL print ";
             // int p = 1;
             // cout<<p<<"\n";
-            while (node != NULL) {
+            temp = node;
+            while (temp != NULL) {
+                cout<<"1\n";
                 // cout<<p<<"\n";
                 // if(p > 10) 
                 //     break;
-                cout << node->name << " ";
+                cout << temp->name << " ";
                 // if(node == node->rt)
                 //     cout<<"this is a benzene snake!\n";
                 // else cout<<"technically not a benzene snake!\n";
-                node = node->rt;
+                temp = temp->rt;
                 //p++;
             }
             cout << "\n";
             break;
         }
-        case declaration:
+        case declaration: {
             cout << "DECLARATION ";
-            while (node != NULL) {
-                cout << node->name << " ";
-                node = node->rt;
+            temp = node;
+            while (temp != NULL) {
+                cout<<"2\n";
+                cout << temp->name << " ";
+                if(temp == temp->rt)cout<<"fail\n";
+                temp = temp->rt;
             }
             cout << "\n";
             break;
         // Add cases for other types as needed
-        case condition:
-          cout<<"\nCONDITIONAL\nLogical Expression start\n";
-          // Logical expression here
-          printNode(node->expr);
-          cout<<"Logical expression end\n If True, stmt_list here : \n";
-          // if stmt_list
-          printTree(node->ifTrue); 
-          cout<<"Over... \n Else stmt_list here: \n";
-          // else stmt_list
-          printTree(node->ifFalse); 
-          cout<<"CONDITIONAL block over\n\n";
-
+//         case condition:
+//           cout<<"\nCONDITIONAL\nLogical Expression start\n";
+//           // Logical expression here
+//           printNode(node->expr);
+//           cout<<"Logical expression end\n If True, stmt_list here : \n";
+//           // if stmt_list
+//           printTree(node->ifTrue); 
+//           cout<<"Over... \n Else stmt_list here: \n";
+//           // else stmt_list
+//           printTree(node->ifFalse); 
+//           cout<<"CONDITIONAL block over\n\n";
+        }
         default:
             cout << "Unknown node type\n";
     }
@@ -135,6 +142,11 @@ void printNode(const node* node) {
 %type<Node> Wlist
 %type<Node> Gid
 %type<Node> Wid
+%type<Node> Gdecl_sec
+%type<Node> Prog
+%type<Node> Gdecl_list
+%type<Node> Gdecl
+
 // below line might be shitty. Sorry
 
 
@@ -142,22 +154,31 @@ void printNode(const node* node) {
 
 	Prog	:	Gdecl_sec stmt_list // Fdef_sec MainBlock		;
       {
-        globalStatementList = $2;
+        $1->next = $2;
+        $$ = $1;
+        globalStatementList = $1;
       }
       
 //        {cout<<"In Prog\n";}
   ;
 		
-	Gdecl_sec:	DECL Gdecl_list ENDDECL {
-
-      }
+	Gdecl_sec:	DECL Gdecl_list ENDDECL 
+    {
+      $$ = $2;
+    }
 		;
 		
 	Gdecl_list: 
-		| 	Gdecl Gdecl_list
+		| 	Gdecl Gdecl_list 
+        {
+          $$ = $1;
+        }
 		;
 		
-  Gdecl 	:	ret_type Glist ';'
+  Gdecl 	:	ret_type Glist ';' {
+    // currently only integer node. 
+    $$ = $2;
+  }
 		;
 		
 	ret_type:	T_INT		{ }
@@ -167,10 +188,12 @@ void printNode(const node* node) {
 	Glist 	:	Gid
              {
                 $$ = createNode(declaration, UNDEFINED, $1->name);
+                cout<<"Am I in declaration ? \n";
              }
 		|	Gid ',' Glist 
       {
                 $$ = createNode(declaration, UNDEFINED, $1->name, NULL, $3);
+                cout<<"Am I in declaration ? \n";
       }
 		;
 	
@@ -226,7 +249,7 @@ void printNode(const node* node) {
 	main	:	MAIN		{ 					}
 		;
 		
-	Ldecl_sec:	DECL Ldecl_list ENDDECL	{}
+	Ldecl_sec:	DECL Ldecl_list ENDDECL	{} 
 		;
 
 	Ldecl_list:		
@@ -251,6 +274,7 @@ void printNode(const node* node) {
           {		
             $1->next = $2;
             $$ = $1;
+            statement_list.push_back($1);
           }
 		//|	error ';' 	//	{ cout<<"error end \n"; }
 		;
@@ -262,23 +286,24 @@ void printNode(const node* node) {
 		|	read_stmt ';'	//	{ cout<<"read_stmt end\n"; }
 		|	write_stmt ';'		
           { 
+            $$ = createNode(printStmt);
             $$ = $1;
-            auto temp = $1;
+            node* temp = $1;
             // some comments deleted. Check commits in April 5. 
 
-            while(temp != NULL)
-            {
-              cout<<temp->name<<" ";
-              temp = temp->rt;
-            }
-            cout<<"\n";
+            // while(temp != NULL)
+            // {
+            //   cout<<"3\n";
+            //   cout<<temp->name<<" ";
+            //   temp = temp->rt;
+            // }
+            // cout<<"\n";
           }
 
 		|	cond_stmt 	 
           { 
             cout<<"cond_stmt end\n";
             $$ = $1;
-            $$->Type = condition;
           }
 		|	func_stmt ';'		// { cout<<"func_stmt end\n";}
 		;
@@ -295,20 +320,17 @@ void printNode(const node* node) {
   Wlist : Wid 
         {
 //           cout<<"entered Wid\n";
-          $1->Type = print;
-          $1->value = getSymbolValue($1->name);
           cout<<getSymbolValue($1->name)<<"\n";
-          $$ = $1;
+          $$ = createNode(print, getSymbolValue($1->name), $1->name);
 //           cout<<"exiting Wid\n";
         }
         
   | Wid ',' Wlist
         {
-          $1->Type = print;
           $1->value = getSymbolValue($1->name);
           cout<<getSymbolValue($1->name)<<"\n";
-          $1->rt = $3;
-          $$ = $1;
+          $$ = createNode(print, getSymbolValue($1->name), $1->name, NULL, $3);
+
         }
   ;
 
@@ -324,6 +346,7 @@ void printNode(const node* node) {
         {
           setSymbolValue($1->name, $3->value);
           $$ = createNode(assign, $3->value, $1->name, $1, $3);
+          cout<<$$<<" This is the address of node of assign stmt. \n";
           cout<<"An assign node creation\n";
         }
 		;
@@ -364,7 +387,10 @@ void printNode(const node* node) {
       { 
           $$ = createNode(constant, (-1)*$2->value);
       }
-		|	var_expr	//	{}
+		|	var_expr		
+      {
+        $$ = createNode(declaration, UNDEFINED, $1->name);
+      }
 		|	T			{ 						  	}
 		|	F			{ 	}
 		|	'(' expr ')'		
@@ -444,11 +470,14 @@ void yyerror ( char  *s) {
    fprintf (stderr, "%s\n", s);
  }
 
+// printTree :: stmt_list -> 
 void printTree(node *stmt_list)
 {
   int k = 0;
   node *temp = stmt_list;
   while(temp != NULL) {
+    cout<<"4\n";
+    cout<<temp<<"\n";
     k++;
     cout<<k<<"   type : "<<temp->Type;
     printNode(temp);
@@ -457,9 +486,39 @@ void printTree(node *stmt_list)
   free(temp);
 }
 
+
+void printWholeTree(node* node){
+  if(node == NULL){
+    cout<<"null node! \n";
+    return;
+  }
+  cout<<"Type : ";
+  // <<node->Type<<"\n";
+  switch(node->Type) {
+    case assign:
+      cout<<"assign type\n";
+    case print:
+      cout<<"print type\n";
+    case declaration:
+      cout<<"declaration type\n";
+    default:
+      cout<<"error\n";
+  }
+  cout<<"left \n";
+  printWholeTree(node->lt);
+  cout<<"left end\nright \n";
+  printWholeTree(node->rt);
+  cout<<"rightend\nnext statement \n";
+  printWholeTree(node->next); 
+  cout<<"nextStatementEnd\n";
+}
+
 int main(){
 extern int yydebug;
 // yydebug = 1;
 yyparse();
+cout<<"Size of statement list : "<<statement_list.size()<<"\n";
+cout<<"printWholeTree\n";
+cout<<"\n\n\nprintTree\n";
 printTree(globalStatementList);
 }
