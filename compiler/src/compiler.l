@@ -15,7 +15,7 @@ digit	[0-9]
 letter	[a-zA-Z]
 
 %%
-begindecl {
+decl {
     return  DECL;
 	}
 enddecl {
