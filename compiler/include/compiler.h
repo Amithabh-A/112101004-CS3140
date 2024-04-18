@@ -1,5 +1,3 @@
-using namespace std;
-
 typedef enum type {
   assign,
   print,
@@ -27,7 +25,10 @@ typedef enum type {
 
   And,
   Or,
-  Not
+  Not,
+
+  Int,
+  Bool
 
 } type;
 

@@ -68,6 +68,7 @@ void printNode(const node *node) ;
 %type<Node> Prog
 %type<Node> Gdecl_list
 %type<Node> Gdecl
+%type<Node> ret_type
 
 
 %%
@@ -96,13 +97,22 @@ void printNode(const node *node) ;
 		;
 		
   Gdecl 	:	ret_type Glist ';' {
-    // currently only integer node. 
-    $$ = createNode(declarationStmt, UNDEFINED, NULL, NULL, $2);
+    // we have to create node for type of variable
+    // type can be int or bool
+    // Initially we have to create node for type in ret_type. 
+    $$ = createNode(declarationStmt, UNDEFINED, NULL, $1, $2);
   }
 		;
 		
-	ret_type:	T_INT		{ }
-    | T_BOOL { }
+	ret_type:	T_INT
+      { 
+        // other than giving type, no info is there for ret_type node. 
+        $$ = createNode(Int);
+      }
+    | T_BOOL 
+      { 
+        $$ = createNode(Bool); 
+      }
 		;
 		
 	Glist 	:	Gid
@@ -221,8 +231,7 @@ void printNode(const node *node) ;
 
 		|	cond_stmt 	 
           { 
-            cout<<"cond_stmt end\n";
-            $$ = $1;
+            $$ = createNode(conditionStmt, UNDEFINED, NULL, NULL, $1);
           }
 		|	func_stmt ';'		// { cout<<"func_stmt end\n";}
 		;
@@ -271,10 +280,14 @@ void printNode(const node *node) ;
 	cond_stmt:	IF expr '{'stmt_list'}'
         {  
           // $$ = createNode(condition, UNDEFINED, NULL, NULL, NULL, expr = $2, ifTrue = $4);
+          // write code for if statement 
+          $$ = createNode(condition, UNDEFINED, NULL, NULL, NULL, NULL, $2, $4);
         }
 		|	IF expr '{'stmt_list'}' ELSE '{'stmt_list'}' 
         { 						
           // $$ = createNode(condition, expr = $2, ifTrue = $4, ifFalse = $8);
+          // write code for if else statement
+          $$ = createNode(condition, UNDEFINED, NULL, NULL, NULL, NULL, $2, $4, $8);
         }
     |    FOR '(' assign_stmt  ';'  expr ';'  assign_stmt ')' '{' stmt_list '}'                                             {                                                 }
 		;

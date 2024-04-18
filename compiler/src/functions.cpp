@@ -7,6 +7,12 @@
 
 using namespace std;
 
+/*
+ *The class template std::variant represents a type-safe union. An instance of
+ *std::variant at any given time either holds a value of one of its alternative
+ *types, or in the case of error - no value (this state is hard to achieve, see
+ *valueless_by_exception).
+ * */
 node *createNode(type Type, int value = UNDEFINED, const char *name = NULL,
                  node *leftTree = NULL, node *rightTree = NULL,
                  node *next = NULL, node *expr = NULL, node *ifTrue = NULL,
