@@ -35,6 +35,7 @@ void setSymbolValue(const string &name, std::variant<int, bool> value,
 void printNode(const node *node) ;
 
 int getIntValue(std::variant<int, bool> value);
+bool getBoolValue(std::variant<int, bool> value);
 
 %}
 %union{
@@ -356,38 +357,49 @@ int getIntValue(std::variant<int, bool> value);
 		|	expr '<' expr		
         { 						
           // $$ = createNode(lt, $1->value < $3->value, leftTree = $1, rightTree = $3);
+          $$ = createNode(lt, getIntValue($1->value) < getIntValue($3->value), NULL, $1, $3);
         }
 		|	expr '>' expr		
         { 						
         //   $$ = createNode(gt, truthVal = $1->value > $3->value, leftTree = $1, rightTree = $3);
+        $$ = createNode(gt, getIntValue($1->value) > getIntValue($3->value), NULL, $1, $3);
         }
 		|	expr GREATERTHANOREQUAL expr			
         { 						
         //   $$ = createNode(ge, truthVal = $1->value >= $3->value, leftTree = $1, rightTree = $3);
+        $$ = createNode(ge, getIntValue($1->value) >= getIntValue($3->value), NULL, $1, $3);
         }
 		|	expr LESSTHANOREQUAL expr	
         { 						
         //   $$ = createNode(le, truthVal = $1->value <= $3->value, leftTree = $1, rightTree = $3);
+        $$ = createNode(le, getIntValue($1->value) <= getIntValue($3->value), NULL, $1, $3);
         }
 		|	expr NOTEQUAL expr		
         { 						
         //   $$ = createNode(ne, truthVal = $1->value != $3->value, leftTree = $1, rightTree = $3);
+        $$ = createNode(ne, getIntValue($1->value) != getIntValue($3->value), NULL, $1, $3);
         }
 		|	expr EQUALEQUAL expr	
         { 					
         //   $$ = createNode(eq, truthVal = $1->value == $3->value, leftTree = $1, rightTree = $3);
+        $$ = createNode(eq, getIntValue($1->value) == getIntValue($3->value), NULL, $1, $3);
         }
 		|	LOGICAL_NOT expr	
         { 					
         //   $$ = createNode(Not, truthVal = !$2->value, rightTree = $2);
+        // even if we write UNDEFINED in the position of node->value, no problem is there, because
+        // we are just building an AST. 
+        $$ = createNode(Not, !getBoolValue($2->value), NULL, NULL, $2);
         }
 		|	expr LOGICAL_AND expr	
         { 					
         //   $$ = createNode(And, truthVal = $1->value && $3->value, leftTree = $1, rightTree = $3);
+        $$ = createNode(And,getBoolValue($1->value) && getBoolValue($3->value), NULL, $1, $3);
         }
 		|	expr LOGICAL_OR expr	
         { 					
         //   $$ = createNode(Or, truthVal = $1->value || $3->value, leftTree = $1, rightTree = $3);
+        $$ = createNode(Or, getBoolValue($1->value) || getBoolValue($3->value), NULL, $1, $3);
         }
 
 		;

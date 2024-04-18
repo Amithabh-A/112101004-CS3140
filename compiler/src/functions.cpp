@@ -209,3 +209,7 @@ void printTree(node *stmt_list) {
 //
 
 int getIntValue(std::variant<int, bool> value) { return std::get<int>(value); }
+
+bool getBoolValue(std::variant<int, bool> value) {
+  return std::get<bool>(value);
+}
