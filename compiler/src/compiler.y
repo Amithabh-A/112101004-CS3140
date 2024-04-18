@@ -11,28 +11,30 @@
 using namespace std;
 int yylex();
 void yyerror( char* );
-unordered_map<string, int>symbol_table;
+unordered_map<string, std::variant<int, bool>>symbol_table;
 node *globalStatementList;
 vector<const node*>statement_list; 
 
 void printTree(node *stmt_list);
 void printWholeTree(node* stmt_list);
 
-node *createNode(type Type, int value = UNDEFINED, const char *name = NULL,
+node *createNode(type Type, std::variant<int, bool> value = UNDEFINED, const char *name = NULL,
                  node *leftTree = NULL, node *rightTree = NULL,
                  node *next = NULL, node *expr = NULL, node *ifTrue = NULL,
                  node *ifFalse = NULL) ;
 
 int getSymbolValue(
     const string &name,
-    unordered_map<string, int>
+    unordered_map<string, std::variant<int, bool>>
         &symbol_table) ; // just taking string reference, avoiding copy.
 
 
-void setSymbolValue(const string &name, int value,
-                    unordered_map<string, int> symbol_table); 
+void setSymbolValue(const string &name, std::variant<int, bool> value,
+                    unordered_map<string, std::variant<int, bool>> symbol_table); 
 
 void printNode(const node *node) ;
+
+int getIntValue(std::variant<int, bool> value);
 
 %}
 %union{
@@ -315,7 +317,7 @@ void printNode(const node *node) ;
       }
 		|	'-' NUM	%prec UMINUS
       { 
-          $$ = createNode(constant, (-1)*$2->value);
+          $$ = createNode(constant, (-1)*std::get<int>($2->value));
       }
 		|	var_expr		
       {
@@ -331,29 +333,29 @@ void printNode(const node *node) ;
 
 		|	expr '+' expr 
         {
-          $$ = createNode(add, $1->value + $3->value, NULL, $1, $3, NULL);
+          $$ = createNode(add, getIntValue($1->value)  + getIntValue($3->value), NULL, $1, $3, NULL);
         }
 		|	expr '-' expr
         {
-          $$ = createNode(sub, $1->value - $3->value, NULL, $1, $3, NULL);
+          $$ = createNode(sub, getIntValue($1->value) - getIntValue($3->value), NULL, $1, $3, NULL);
         }
 		|	expr '*' expr
         {
-          $$ = createNode(mul, $1->value * $3->value, NULL, $1, $3, NULL);
+          $$ = createNode(mul, getIntValue($1->value) * getIntValue($3->value), NULL, $1, $3, NULL);
         }
 		|	expr '/' expr
         {
-          if($3->value == 0)
+          if(getIntValue($3->value) == 0)
           {
             cout<<"ZeroDivisionError\n";
             exit(1);
           }
-          $$ = createNode(Div, (int)($1->value / $3->value), NULL, $1, $3, NULL);
+          $$ = createNode(Div, (int)(getIntValue($1->value) / getIntValue($3->value)), NULL, $1, $3, NULL);
         }
 // 		|	expr '%' expr 		{ 						}
 		|	expr '<' expr		
         { 						
-        //   $$ = createNode(lt, truthVal = $1->value < $3->value, leftTree = $1, rightTree = $3);
+          // $$ = createNode(lt, $1->value < $3->value, leftTree = $1, rightTree = $3);
         }
 		|	expr '>' expr		
         { 						

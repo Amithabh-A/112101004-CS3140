@@ -1,3 +1,5 @@
+#include <variant>
+
 typedef enum type {
   assign,
   print,
@@ -34,7 +36,7 @@ typedef enum type {
 
 typedef struct node {
   type Type;
-  int value;
+  std::variant<int, bool> value;
   char *name;
   node *lt;
   node *rt;
