@@ -282,15 +282,13 @@ bool getBoolValue(std::variant<int, bool> value);
 
 	cond_stmt:	IF expr '{'stmt_list'}'
         {  
-          // $$ = createNode(condition, UNDEFINED, NULL, NULL, NULL, expr = $2, ifTrue = $4);
           // write code for if statement 
-          $$ = createNode(condition, UNDEFINED, NULL, NULL, NULL, NULL, $2, $4);
+          $$ = createNode(If, UNDEFINED, NULL, NULL, NULL, NULL, $2, $4);
         }
 		|	IF expr '{'stmt_list'}' ELSE '{'stmt_list'}' 
         { 						
-          // $$ = createNode(condition, expr = $2, ifTrue = $4, ifFalse = $8);
           // write code for if else statement
-          $$ = createNode(condition, UNDEFINED, NULL, NULL, NULL, NULL, $2, $4, $8);
+          $$ = createNode(IfElse , UNDEFINED, NULL, NULL, NULL, NULL, $2, $4, $8);
         }
     |    FOR '(' assign_stmt  ';'  expr ';'  assign_stmt ')' '{' stmt_list '}'                                             {                                                 }
 		;

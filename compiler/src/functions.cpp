@@ -82,6 +82,10 @@ void printNode(const node *node) {
     cout << "PRINT ";
     printNode(node->rt);
     break;
+  case conditionStmt:
+    cout << "CONDITION ";
+    printNode(node->rt);
+    break;
 
   case declaration: {
     temp = node;
@@ -104,7 +108,7 @@ void printNode(const node *node) {
     }
     cout << "\n";
     break;
-  }
+  };
 
     // Add cases for other types as needed
     //         case condition:
