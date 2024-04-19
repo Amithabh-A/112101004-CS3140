@@ -8,6 +8,7 @@
 #include<map>
 #include<vector>
 #include "../include/compiler.h"
+#include <type_traits>
 #define UNDEFINED (INT_MAX/2)
 using namespace std;
 int yylex();
@@ -20,6 +21,9 @@ vector<const node*>statement_list;
 void printTree(node *stmt_list);
 void printWholeTree(node* stmt_list);
 void nodeImage(node *node) ;
+bool is_statement(type value) ;
+void insertNext(node *stmt_list, node *stmt) ;
+
 
 
 
@@ -88,13 +92,16 @@ bool getBoolValue(std::variant<int, bool> value);
       {
         // we have to go through GdeclList and append mymain at the end of GdeclList. 
         node *temp = $1;
-        while(temp->next != NULL)
-        {
-          temp = temp->next;
-        }
-        temp->next = $2;
+        
+        insertNext($1, $2);
+
+        // while(temp->next != NULL)
+        // {
+        //   temp = temp->next;
+        // }
+        // temp->next = $2;
         $$ = $1;
-        // globalStatementList = $1;
+        globalStatementList = $1;
       }
       
 //        {cout<<"In Prog\n";}
@@ -108,7 +115,7 @@ bool getBoolValue(std::variant<int, bool> value);
 	Gdecl_sec:	DECL Gdecl_list ENDDECL 
     {
       $$ = $2;
-      globalStatementList = $2;
+      // globalStatementList = $2;
     }
 		;
 		
@@ -116,7 +123,8 @@ bool getBoolValue(std::variant<int, bool> value);
 		| 	Gdecl Gdecl_list 
         {
           cout<<"Gdecl_list\n";
-          $1->next = $2;
+          insertNext($1, $2);
+          // $1->next = $2;
           $$ = $1;
         }
     | error ';' {cout<<"error in Gdecl_list\n";}
@@ -254,9 +262,10 @@ bool getBoolValue(std::variant<int, bool> value);
 	stmt_list:	/* NULL */		{  }
     |	statement stmt_list	
           {		
-            $1->next = $2;
+            insertNext($1, $2);
+            // $1->next = $2;
             $$ = $1;
-            cout<<$$<<" This is the address of node of stmt_list. \n";
+            cout<<$$<<" This is the address of node of stmt_list. \ttype : " << $$->Type << "\n";
 
             // statement_list.push_back($1);
           }

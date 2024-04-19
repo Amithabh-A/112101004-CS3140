@@ -18,7 +18,6 @@ lex :
 	mv lex.yy.c src/
 
 compile : 
-	mkdir bin
 	clang++ -g -std=c++17 src/lex.yy.c src/compiler.cc src/functions.cpp -o bin/compiler
 
 run : clear execute
@@ -29,4 +28,3 @@ execute :
 clean : 
 	rm include/compiler.hh src/compiler.cc bin/compiler src/lex.yy.c 
 	rm -rf bin/compiler.dSYM
-	rm -rf bin

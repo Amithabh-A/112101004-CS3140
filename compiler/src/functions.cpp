@@ -17,7 +17,8 @@ using namespace std;
 
 /*Now, errors can come wherever defns like `int value` is written. */
 void printTree(node *stmt_list);
-template <typename T> bool is_statement(T value);
+// template <typename T> bool is_statement(T value);
+bool is_statement(type value);
 
 // node *createNode(type Type, std::variant<int, bool> value = UNDEFINED,
 //                  const char *name = NULL, node *leftTree = NULL,
@@ -356,7 +357,7 @@ bool getBoolValue(std::variant<int, bool> value) {
 
 void insertNext(node *stmt_list, node *stmt) {
   if (!is_statement(stmt->Type)) {
-    cout << "error: invalid statement\n";
+    cout << "error: not a statement\n";
     return;
   }
   node *temp = stmt_list;
@@ -364,6 +365,8 @@ void insertNext(node *stmt_list, node *stmt) {
     temp = temp->next;
   }
   temp->next = stmt;
+  // success
+  cout << "success: statement added\n";
 }
 
 // enums used :
@@ -413,43 +416,52 @@ void insertNext(node *stmt_list, node *stmt) {
 //   assignVar,   // 32
 //
 
-template <typename T> bool is_statement(T value) {
-  return std::is_same<T, type>::value &&
-         !std::is_same<T, decltype(assign)>::value &&
-         !std::is_same<T, decltype(print)>::value &&
-         !std::is_same<T, decltype(declaration)>::value &&
-         !std::is_same<T, decltype(If)>::value &&
-         !std::is_same<T, decltype(IfElse)>::value &&
-         !std::is_same<T, decltype(For)>::value &&
-         !std::is_same<T, decltype(While)>::value &&
-         // !std::is_same<T, decltype(assignStmt)>::value &&
-         // !std::is_same<T, decltype(printStmt)>::value &&
-         // !std::is_same<T, decltype(declarationStmt)>::value &&
-         // !std::is_same<T, decltype(conditionStmt)>::value &&
-         !std::is_same<T, decltype(var)>::value &&
-         !std::is_same<T, decltype(add)>::value &&
-         !std::is_same<T, decltype(sub)>::value &&
-         !std::is_same<T, decltype(mul)>::value &&
+// template <typename T> bool is_statement(T value) {
+//   return std::is_same<T, type>::value &&
+//          !std::is_same<T, decltype(assign)>::value &&
+//          !std::is_same<T, decltype(print)>::value &&
+//          !std::is_same<T, decltype(declaration)>::value &&
+//          !std::is_same<T, decltype(If)>::value &&
+//          !std::is_same<T, decltype(IfElse)>::value &&
+//          !std::is_same<T, decltype(For)>::value &&
+//          !std::is_same<T, decltype(While)>::value &&
+//          // !std::is_same<T, decltype(assignStmt)>::value &&
+//          // !std::is_same<T, decltype(printStmt)>::value &&
+//          // !std::is_same<T, decltype(declarationStmt)>::value &&
+//          // !std::is_same<T, decltype(conditionStmt)>::value &&
+//          !std::is_same<T, decltype(var)>::value &&
+//          !std::is_same<T, decltype(add)>::value &&
+//          !std::is_same<T, decltype(sub)>::value &&
+//          !std::is_same<T, decltype(mul)>::value &&
+//
+//          !std::is_same<T, decltype(Div)>::value &&
+//          !std::is_same<T, decltype(constant)>::value &&
+//          !std::is_same<T, decltype(Float)>::value &&
+//          !std::is_same<T, decltype(eq)>::value &&
+//          !std::is_same<T, decltype(le)>::value &&
+//          !std::is_same<T, decltype(ge)>::value &&
+//
+//          !std::is_same<T, decltype(lt)>::value &&
+//          !std::is_same<T, decltype(gt)>::value &&
+//          !std::is_same<T, decltype(ne)>::value &&
+//          !std::is_same<T, decltype(And)>::value &&
+//          !std::is_same<T, decltype(Or)>::value &&
+//          !std::is_same<T, decltype(Not)>::value &&
+//          !std::is_same<T, decltype(Int)>::value &&
+//          !std::is_same<T, decltype(Bool)>::value &&
+//          !std::is_same<T, decltype(initialisation)>::value &&
+//          !std::is_same<T, decltype(condition)>::value &&
+//          !std::is_same<T, decltype(update)>::value &&
+//          !std::is_same<T, decltype(Array)>::value &&
+//          !std::is_same<T, decltype(assignArray)>::value &&
+//          !std::is_same<T, decltype(assignVar)>::value;
+// }
 
-         !std::is_same<T, decltype(Div)>::value &&
-         !std::is_same<T, decltype(constant)>::value &&
-         !std::is_same<T, decltype(Float)>::value &&
-         !std::is_same<T, decltype(eq)>::value &&
-         !std::is_same<T, decltype(le)>::value &&
-         !std::is_same<T, decltype(ge)>::value &&
-
-         !std::is_same<T, decltype(lt)>::value &&
-         !std::is_same<T, decltype(gt)>::value &&
-         !std::is_same<T, decltype(ne)>::value &&
-         !std::is_same<T, decltype(And)>::value &&
-         !std::is_same<T, decltype(Or)>::value &&
-         !std::is_same<T, decltype(Not)>::value &&
-         !std::is_same<T, decltype(Int)>::value &&
-         !std::is_same<T, decltype(Bool)>::value &&
-         !std::is_same<T, decltype(initialisation)>::value &&
-         !std::is_same<T, decltype(condition)>::value &&
-         !std::is_same<T, decltype(update)>::value &&
-         !std::is_same<T, decltype(Array)>::value &&
-         !std::is_same<T, decltype(assignArray)>::value &&
-         !std::is_same<T, decltype(assignVar)>::value;
+bool is_statement(type value) {
+  if (value == declarationStmt || value == assignStmt || value == printStmt ||
+      value == conditionStmt) {
+    return true;
+  }
+  return false;
+  cout << "Unknown node type" << value << "\n";
 }
