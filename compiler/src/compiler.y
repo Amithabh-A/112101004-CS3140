@@ -94,7 +94,7 @@ bool getBoolValue(std::variant<int, bool> value);
         }
         temp->next = $2;
         $$ = $1;
-        globalStatementList = $1;
+        // globalStatementList = $1;
       }
       
 //        {cout<<"In Prog\n";}
@@ -108,6 +108,7 @@ bool getBoolValue(std::variant<int, bool> value);
 	Gdecl_sec:	DECL Gdecl_list ENDDECL 
     {
       $$ = $2;
+      globalStatementList = $2;
     }
 		;
 		
