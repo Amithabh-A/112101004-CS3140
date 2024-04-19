@@ -39,6 +39,9 @@ else				{
 endif				{
     return ENDIF;
 				}
+for 				{
+  return FOR;
+				}		
 {digit}+  { 	
 //             yylval.val = atoi(yytext);
             yylval.Node->value = atoi(yytext);
@@ -57,7 +60,7 @@ endif				{
 "AND" {return LOGICAL_AND;}
 "OR" {return LOGICAL_OR;}
 "NOT" {return LOGICAL_NOT;}
-[-+()=/*;,\{\}] { return *yytext; }
+[-+*/=()><;,\{\}\[\]\%] { return *yytext; }
 ["]                             { }
 "\\n"                           {
                                 }

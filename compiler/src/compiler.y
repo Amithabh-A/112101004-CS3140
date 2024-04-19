@@ -302,6 +302,10 @@ bool getBoolValue(std::variant<int, bool> value);
           $$ = createNode(For, UNDEFINED, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $3, $5, $7, $10);
         }
 
+    | error ';' 
+        {
+          cout<<"error in for loop\n";
+        }
 		;
 	
 	func_stmt:	func_call 		{ 						}

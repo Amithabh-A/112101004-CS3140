@@ -131,6 +131,14 @@ void printNode(const node *node) {
     cout << "ELSE ";
     printTree(node->ifFalse);
     break;
+
+  case For:
+    cout << "FOR ";
+    printNode(node->init);
+    printNode(node->condition);
+    printNode(node->update);
+    printTree(node->body);
+    break;
   case var:
     cout << "VAR " << node->name << "\n";
     break;
