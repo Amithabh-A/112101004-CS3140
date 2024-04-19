@@ -24,6 +24,9 @@ enddecl {
 integer {
     return T_INT;
   }
+float {
+  return T_FLOAT;
+}
 print {
     return WRITE;
   }
@@ -45,6 +48,11 @@ for 				{
 while 				{
   return WHILE;
 				}		
+
+{[0-9]+(\.[0-9]+)?([eE][-+]?[0-9]+)?} {
+            yylval.Node->value = atoi(yytext);
+            return FLOAT;
+}
 {digit}+  { 	
 //             yylval.val = atoi(yytext);
             yylval.Node->value = atoi(yytext);
