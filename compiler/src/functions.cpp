@@ -320,9 +320,15 @@ void nodeImage(node *node) {
 
 // printTree :: stmt_list ->
 void printTree(node *stmt_list) {
+  int l = 0;
   int k = 0;
   node *temp = stmt_list;
   while (temp != NULL) {
+    l++;
+    temp = temp->next;
+  }
+  temp = stmt_list;
+  while (k < l) {
     // cout << "4\n";
     // cout << temp << "\n";
     k++;
