@@ -4,7 +4,6 @@ typedef enum type {
   assign,
   print,
   declaration,
-  condition,
   If,
   IfElse,
   For,
@@ -35,6 +34,8 @@ typedef enum type {
 
   Int,
   Bool
+
+  // for statement
 
 } type;
 

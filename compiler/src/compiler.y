@@ -294,7 +294,10 @@ bool getBoolValue(std::variant<int, bool> value);
           // write code for if else statement
           $$ = createNode(IfElse , UNDEFINED, NULL, NULL, NULL, NULL, $2, $4, $8);
         }
-    |    FOR '(' assign_stmt  ';'  expr ';'  assign_stmt ')' '{' stmt_list '}'                                             {                                                 }
+    | FOR '(' assign_stmt  ';'  expr ';'  assign_stmt ')' '{' stmt_list '}'     
+        {
+        }
+
 		;
 	
 	func_stmt:	func_call 		{ 						}
@@ -324,8 +327,9 @@ bool getBoolValue(std::variant<int, bool> value);
       }
 		|	var_expr		
       {
+        $$ = createNode(var, getSymbolValue($1->name, symbol_table), $1->name);
         // $$ = createNode(declaration, UNDEFINED, $1->name);
-        $$ = $1;
+        // $$ = $1;
       }
 		|	T			{ 						  	}
 		|	F			{ 	}
@@ -408,7 +412,7 @@ bool getBoolValue(std::variant<int, bool> value);
 	
 	var_expr:	VAR	
       {
-        $$ = createNode(var, getSymbolValue($1->name, symbol_table), $1->name);
+        // $$ = createNode(var, getSymbolValue($1->name, symbol_table), $1->name);
       }
 		|	var_expr '[' expr ']'	{                                                 }
 		;

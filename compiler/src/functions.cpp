@@ -129,7 +129,7 @@ void printNode(const node *node) {
     cout << "VAR " << node->name << "\n";
     break;
   case constant:
-    cout << "CONSTANT " << std::get<int>(node->value) << "\n";
+    cout << "CONSTANT " << std::get<int>(node->value) << " ";
   case add:
     cout << "ADD ";
     printNode(node->lt);
@@ -243,6 +243,13 @@ void nodeImage(node *node) {
     nodeImage(node->next);
   }
 
+  if (node->expr == NULL) {
+    cout << "expr: NULL\n";
+  } else {
+    cout << "\nExpr : \n";
+    nodeImage(node->expr);
+  }
+
   cout << "\n";
 }
 
@@ -254,8 +261,10 @@ void printTree(node *stmt_list) {
     // cout << "4\n";
     // cout << temp << "\n";
     k++;
+    cout << k << "   type : " << temp->Type << " ";
     // cout << k << "   type : " << temp->Type;
-    printNode(temp);
+    if (temp->Type != assign && temp->Type != eq)
+      printNode(temp);
     temp = temp->next;
   }
   free(temp);
