@@ -48,8 +48,15 @@ for 				{
 while 				{
   return WHILE;
 				}		
+begin {
+  return BEG;
+}
 
-{[0-9]+(\.[0-9]+)?([eE][-+]?[0-9]+)?} {
+end {
+  return END;
+}
+
+({digit}+\.{digit}+)|({digit}*\.{digit}+)|({digit}+\.{digit}*) {
             yylval.Node->value = atoi(yytext);
             return FLOAT;
 }

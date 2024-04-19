@@ -83,26 +83,26 @@ void setSymbolValue(
   cout << "success: " << name << " = " << x << "\n";
 }
 
-void printNode(const node *node) {
+void printNode(const node *node, int param = 0) {
   if (node == NULL)
     return;
   const struct node *temp;
   switch (node->Type) {
   case declarationStmt:
     cout << "DECLARATION ";
-    printNode(node->rt);
+    printNode(node->rt, param);
     break;
   case assignStmt:
     cout << "ASSIGN ";
-    printNode(node->rt);
+    printNode(node->rt, param);
     break;
   case printStmt:
     cout << "PRINT ";
-    printNode(node->rt);
+    printNode(node->rt, param);
     break;
   case conditionStmt:
     cout << "CONDITION ";
-    printNode(node->rt);
+    printNode(node->rt, param);
     break;
 
   case declaration: {
@@ -118,8 +118,8 @@ void printNode(const node *node) {
     // cout << node->name << " " << std::get<int>(node->value) << "\n";
     // cout << node->name << " " << getIntValue(node->value);
     // cout << node->name << " ";
-    printNode(node->lt);
-    printNode(node->rt);
+    printNode(node->lt, param);
+    printNode(node->rt, param);
     // I might need to print node->lt
     // printNode(node->rt);
     break;
@@ -136,12 +136,12 @@ void printNode(const node *node) {
 
   case If:
     cout << "IF ";
-    printNode(node->expr);
+    printNode(node->expr, param);
     printTree(node->ifTrue);
     break;
   case IfElse:
     cout << "IF ";
-    printNode(node->expr);
+    printNode(node->expr, param);
     printTree(node->ifTrue);
     cout << "ELSE ";
     printTree(node->ifFalse);
@@ -149,14 +149,14 @@ void printNode(const node *node) {
 
   case For:
     cout << "FOR ";
-    printNode(node->init);
-    printNode(node->condition);
-    printNode(node->update);
+    printNode(node->init, param);
+    printNode(node->condition, param);
+    printNode(node->update, param);
     printTree(node->body);
     break;
   case While:
-    cout << "\nWHILE ";
-    printNode(node->whilecond);
+    cout << "\nWHILE\t";
+    printNode(node->whilecond, param + 2);
     printTree(node->whilestmts);
     cout << "\nENDWHILE\n";
     break;
@@ -168,70 +168,70 @@ void printNode(const node *node) {
     break;
   case add:
     cout << "ADD ";
-    printNode(node->lt);
-    printNode(node->rt);
+    printNode(node->lt, param);
+    printNode(node->rt, param);
     break;
   case sub:
     cout << "SUB ";
-    printNode(node->lt);
-    printNode(node->rt);
+    printNode(node->lt, param);
+    printNode(node->rt, param);
     break;
   case mul:
     cout << "MUL ";
-    printNode(node->lt);
-    printNode(node->rt);
+    printNode(node->lt, param);
+    printNode(node->rt, param);
     break;
   case Div:
     cout << "DIV ";
-    printNode(node->lt);
-    printNode(node->rt);
+    printNode(node->lt, param);
+    printNode(node->rt, param);
     break;
   // relational operators
   case lt:
     cout << "LT ";
-    printNode(node->lt);
-    printNode(node->rt);
+    printNode(node->lt, param);
+    printNode(node->rt, param);
     break;
   case gt:
     cout << "GT ";
-    printNode(node->lt);
-    printNode(node->rt);
+    printNode(node->lt, param);
+    printNode(node->rt, param);
     break;
   case le:
     cout << "LE ";
-    printNode(node->lt);
-    printNode(node->rt);
+    printNode(node->lt, param);
+    printNode(node->rt, param);
     break;
   case ge:
     cout << "GE ";
-    printNode(node->lt);
-    printNode(node->rt);
+    printNode(node->lt, param);
+    printNode(node->rt, param);
     break;
   case ne:
     cout << "NE ";
-    printNode(node->lt);
-    printNode(node->rt);
+    printNode(node->lt, param);
+    printNode(node->rt, param);
     break;
   case eq:
     cout << "EQ ";
-    printNode(node->lt);
-    printNode(node->rt);
+    printNode(node->lt, param);
+    printNode(node->rt, param);
     break;
 
   // logical operators
   case Not:
     cout << "NOT ";
-    printNode(node->lt);
+    printNode(node->lt, param);
     break;
   case And:
     cout << "AND ";
-    printNode(node->lt);
-    printNode(node->rt);
+    printNode(node->lt, param);
+    printNode(node->rt, param);
     break;
   case Or:
     cout << "OR ";
-    printNode(node->lt);
-    printNode(node->rt);
+    printNode(node->lt, param);
+    printNode(node->rt, param);
     break;
   default:
     cout << "Unknown node type" << node->Type << "\n";

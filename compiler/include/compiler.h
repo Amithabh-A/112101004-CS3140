@@ -45,6 +45,7 @@ typedef enum type {
   assignVar,   // 32
 
   While, // 33
+  Float, // 34
 
 } type;
 

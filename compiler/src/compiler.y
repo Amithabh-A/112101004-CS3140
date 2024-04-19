@@ -55,9 +55,9 @@ bool getBoolValue(std::variant<int, bool> value);
 %union{
   struct node* Node;
 }
-%token<Node> VAR NUM WRITE
+%token<Node> VAR NUM FLOAT WRITE
 %token BEG END
-%token T_INT T_BOOL
+%token T_INT T_BOOL T_FLOAT
 %token READ 
 %token DECL ENDDECL
 %token IF THEN ELSE ENDIF
@@ -86,11 +86,12 @@ bool getBoolValue(std::variant<int, bool> value);
 %type<Node> Gdecl_list
 %type<Node> Gdecl
 %type<Node> ret_type
+%type<Node> mymain
 
 
 %%
 
-	Prog	:	Gdecl_sec stmt_list // Fdef_sec MainBlock		;
+	Prog	:	Gdecl_sec mymain// stmt_list // Fdef_sec MainBlock		;
       {
         $1->next = $2;
         $$ = $1;
@@ -98,6 +99,11 @@ bool getBoolValue(std::variant<int, bool> value);
       }
       
 //        {cout<<"In Prog\n";}
+  ;
+
+  mymain : BEG stmt_list END {
+    $$ = $2; 
+  }
   ;
 		
 	Gdecl_sec:	DECL Gdecl_list ENDDECL 
@@ -129,6 +135,9 @@ bool getBoolValue(std::variant<int, bool> value);
     | T_BOOL 
       { 
         $$ = createNode(Bool); 
+      }
+    | T_FLOAT{
+        $$ = createNode(Float);
       }
 		;
 		
@@ -371,10 +380,12 @@ bool getBoolValue(std::variant<int, bool> value);
       { 
           $$ = createNode(constant, $1->value);
       }
+    | FLOAT {}
 		|	'-' NUM	%prec UMINUS
       { 
           $$ = createNode(constant, (-1)*std::get<int>($2->value));
       }
+		|	'-' FLOAT	%prec UMINUS {}
 		|	var_expr		
       {
         // $$ = createNode(declaration, UNDEFINED, $1->name);
@@ -386,6 +397,11 @@ bool getBoolValue(std::variant<int, bool> value);
       { 
         $$ = $2; 
       }
+
+    | NUM '+' NUM {}
+    | FLOAT '+' NUM {}
+    | NUM '+' FLOAT {}
+    | FLOAT '+' FLOAT {}
 
 		|	expr '+' expr 
         {
@@ -482,7 +498,7 @@ extern int yydebug;
 // yydebug = 1;
 yyparse();
 // cout<<"Size of statement list : "<<statement_list.size()<<"\n";
-nodeImage(globalStatementList);
+// nodeImage(globalStatementList);
 cout<<"\n\n\nprintTree\n";
 printTree(globalStatementList);
 
