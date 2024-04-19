@@ -116,9 +116,12 @@ void printNode(const node *node) {
   }
   case assign:
     // cout << node->name << " " << std::get<int>(node->value) << "\n";
-    cout << node->name << " ";
-    // I might need to print node->lt
+    // cout << node->name << " " << getIntValue(node->value);
+    // cout << node->name << " ";
+    printNode(node->lt);
     printNode(node->rt);
+    // I might need to print node->lt
+    // printNode(node->rt);
     break;
 
   case print: {
@@ -152,15 +155,16 @@ void printNode(const node *node) {
     printTree(node->body);
     break;
   case While:
-    cout << "WHILE ";
+    cout << "\nWHILE ";
     printNode(node->whilecond);
     printTree(node->whilestmts);
+    cout << "\nENDWHILE\n";
     break;
-  case var:
-    cout << "VAR " << node->name << "\n";
+  case assignVar:
+    cout << "VAR " << node->name << " ";
     break;
   case constant:
-    cout << "CONSTANT " << std::get<int>(node->value) << " ";
+    cout << "CONSTANT " << std::get<int>(node->value) << "\n";
     break;
   case add:
     cout << "ADD ";
@@ -230,7 +234,7 @@ void printNode(const node *node) {
     printNode(node->rt);
     break;
   default:
-    cout << "Unknown node type\n";
+    cout << "Unknown node type" << node->Type << "\n";
   }
 }
 
@@ -332,8 +336,8 @@ void printTree(node *stmt_list) {
     // cout << "4\n";
     // cout << temp << "\n";
     k++;
-    cout << k << "   type : " << temp->Type << " ";
-    // cout << k << "   type : " << temp->Type;
+    // NOTE: DEBUG
+    // cout << k << "   type : " << temp->Type << " ";
     if (temp->Type != assign && temp->Type != eq)
       printNode(temp);
     temp = temp->next;
