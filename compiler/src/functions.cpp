@@ -251,10 +251,10 @@ void printTree(node *stmt_list) {
   int k = 0;
   node *temp = stmt_list;
   while (temp != NULL) {
-    cout << "4\n";
-    cout << temp << "\n";
+    // cout << "4\n";
+    // cout << temp << "\n";
     k++;
-    cout << k << "   type : " << temp->Type;
+    // cout << k << "   type : " << temp->Type;
     printNode(temp);
     temp = temp->next;
   }
