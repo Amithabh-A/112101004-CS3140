@@ -93,6 +93,9 @@ void printNode(const node *node, int param = 0) {
   switch (node->Type) {
   case declarationStmt:
     cout << "DECLARATION ";
+    cout << "left type: " << node->lt->Type << " right type: " << node->rt->Type
+         << "\n";
+    printNode(node->lt, param);
     printNode(node->rt, param);
     break;
   case assignStmt:
@@ -107,14 +110,12 @@ void printNode(const node *node, int param = 0) {
     cout << "CONDITION ";
     printNode(node->rt, param);
     break;
-
   case declaration: {
-    temp = node;
-    while (temp != NULL) {
-      cout << temp->name << " ";
-      temp = temp->rt;
-    }
-    cout << "\n";
+    cout << "before going to var or array\n";
+    cout << "type of left tree: " << node->lt->Type << "\n";
+    printNode(node->lt, param); // var or array
+    cout << "after going to var or array\n";
+    printNode(node->rt, param);
     break;
   }
   case assign:
@@ -164,7 +165,13 @@ void printNode(const node *node, int param = 0) {
     cout << "\nENDWHILE\n";
     break;
   case assignVar:
+    cout << "VAR " << node->name << "\n";
+    break;
+  case var:
     cout << "VAR " << node->name << " ";
+    break;
+  case Int:
+    cout << "INT ";
     break;
   case constant:
     cout << "CONSTANT " << std::get<int>(node->value) << "\n";
@@ -235,6 +242,13 @@ void printNode(const node *node, int param = 0) {
     cout << "OR ";
     printNode(node->lt, param);
     printNode(node->rt, param);
+    break;
+  case Array:
+    cout << "ARRAY " << node->name << " " << getIntValue(node->value) << "\n";
+    // cout << "left type: " << node->lt->Type << "\n";
+    // cout << "right type: " << node->rt->Type << "\n";
+    // printNode(node->lt, param);
+    // printNode(node->rt, param);
     break;
   default:
     cout << "Unknown node type" << node->Type << "\n";
@@ -368,94 +382,6 @@ void insertNext(node *stmt_list, node *stmt) {
   // success
   cout << "success: statement added\n";
 }
-
-// enums used :
-//   assign,      // 0
-//   print,       // 1
-//   declaration, // 2
-//   If,          // 3
-//   IfElse,      // 4
-//   For,         // 5
-//   While, // 33
-//
-//   assignStmt,      // 6
-//   printStmt,       // 7
-//   declarationStmt, // 8
-//   conditionStmt,   // 9
-//
-//   var, // 10
-//   add, // 11
-//   sub, // 12
-//   mul, // 13
-//   Div, // 14
-//
-//   constant, // 15
-//   Float, // 34
-//
-//   eq, // 16
-//   le, // 17
-//   ge, // 18
-//   lt, // 19
-//   gt, // 20
-//   ne, // 21
-//
-//   And, // 22
-//   Or,  // 23
-//   Not, // 24
-//
-//   Int,  // 25
-//   Bool, // 26
-//
-//   // for statement
-//   initialisation, // 27
-//   condition,      // 28
-//   update,         // 29
-//
-//   Array,       // 30
-//   assignArray, // 31
-//   assignVar,   // 32
-//
-
-// template <typename T> bool is_statement(T value) {
-//   return std::is_same<T, type>::value &&
-//          !std::is_same<T, decltype(assign)>::value &&
-//          !std::is_same<T, decltype(print)>::value &&
-//          !std::is_same<T, decltype(declaration)>::value &&
-//          !std::is_same<T, decltype(If)>::value &&
-//          !std::is_same<T, decltype(IfElse)>::value &&
-//          !std::is_same<T, decltype(For)>::value &&
-//          !std::is_same<T, decltype(While)>::value &&
-//          // !std::is_same<T, decltype(assignStmt)>::value &&
-//          // !std::is_same<T, decltype(printStmt)>::value &&
-//          // !std::is_same<T, decltype(declarationStmt)>::value &&
-//          // !std::is_same<T, decltype(conditionStmt)>::value &&
-//          !std::is_same<T, decltype(var)>::value &&
-//          !std::is_same<T, decltype(add)>::value &&
-//          !std::is_same<T, decltype(sub)>::value &&
-//          !std::is_same<T, decltype(mul)>::value &&
-//
-//          !std::is_same<T, decltype(Div)>::value &&
-//          !std::is_same<T, decltype(constant)>::value &&
-//          !std::is_same<T, decltype(Float)>::value &&
-//          !std::is_same<T, decltype(eq)>::value &&
-//          !std::is_same<T, decltype(le)>::value &&
-//          !std::is_same<T, decltype(ge)>::value &&
-//
-//          !std::is_same<T, decltype(lt)>::value &&
-//          !std::is_same<T, decltype(gt)>::value &&
-//          !std::is_same<T, decltype(ne)>::value &&
-//          !std::is_same<T, decltype(And)>::value &&
-//          !std::is_same<T, decltype(Or)>::value &&
-//          !std::is_same<T, decltype(Not)>::value &&
-//          !std::is_same<T, decltype(Int)>::value &&
-//          !std::is_same<T, decltype(Bool)>::value &&
-//          !std::is_same<T, decltype(initialisation)>::value &&
-//          !std::is_same<T, decltype(condition)>::value &&
-//          !std::is_same<T, decltype(update)>::value &&
-//          !std::is_same<T, decltype(Array)>::value &&
-//          !std::is_same<T, decltype(assignArray)>::value &&
-//          !std::is_same<T, decltype(assignVar)>::value;
-// }
 
 bool is_statement(type value) {
   if (value == declarationStmt || value == assignStmt || value == printStmt ||
