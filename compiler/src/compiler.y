@@ -7,7 +7,7 @@
 #include<unordered_map>
 #include<vector>
 #include "../include/compiler.h"
-#define UNDEFINED INT_MAX
+#define UNDEFINED (INT_MAX/2)
 using namespace std;
 int yylex();
 void yyerror( char* );
@@ -18,16 +18,17 @@ vector<const node*>statement_list;
 void printTree(node *stmt_list);
 void printWholeTree(node* stmt_list);
 
-node *createNode(type Type, std::variant<int, bool> value = UNDEFINED, const char *name = NULL,
-                 node *leftTree = NULL, node *rightTree = NULL,
-                 node *next = NULL, node *expr = NULL, node *ifTrue = NULL,
-                 node *ifFalse = NULL) ;
 
-int getSymbolValue(
+
+node *createNode(type Type, std::variant<int, bool> value = UNDEFINED,
+                 const char *name = NULL, node *leftTree = NULL,
+                 node *rightTree = NULL, node *next = NULL, node *expr = NULL,
+                 node *ifTrue = NULL, node *ifFalse = NULL);
+
+std::variant<int, bool> getSymbolValue(
     const string &name,
     unordered_map<string, std::variant<int, bool>>
         &symbol_table) ; // just taking string reference, avoiding copy.
-
 
 void setSymbolValue(const string &name, std::variant<int, bool> value,
                     unordered_map<string, std::variant<int, bool>> symbol_table); 
@@ -119,14 +120,16 @@ bool getBoolValue(std::variant<int, bool> value);
 		;
 		
 	Glist 	:	Gid
-             {
-                $$ = createNode(declaration, UNDEFINED, $1->name);
-                cout<<"Am I in declaration ? \n";
-             }
+      {
+         $$ = createNode(declaration, UNDEFINED, $1->name);
+         symbol_table[$1->name] = UNDEFINED;
+         cout<<"variable "<<$1->name<<" is declared\n";
+      }
 		|	Gid ',' Glist 
       {
-                $$ = createNode(declaration, UNDEFINED, $1->name, NULL, $3);
-                cout<<"Am I in declaration ? \n";
+        $$ = createNode(declaration, UNDEFINED, $1->name, NULL, $3);
+        symbol_table[$1->name] = UNDEFINED;
+        cout<<"variable "<<$1->name<<" is declared\n";
       }
 		;
 	
@@ -404,7 +407,7 @@ bool getBoolValue(std::variant<int, bool> value);
 	
 	var_expr:	VAR	
       {
-        $$ = createNode(declaration, UNDEFINED, $1->name);
+        $$ = createNode(var, getSymbolValue($1->name, symbol_table), $1->name);
       }
 		|	var_expr '[' expr ']'	{                                                 }
 		;

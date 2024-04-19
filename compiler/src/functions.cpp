@@ -4,7 +4,7 @@
 #include <unordered_map>
 #include <variant>
 
-#define UNDEFINED INT_MAX
+#define UNDEFINED (INT_MAX / 2)
 
 using namespace std;
 
@@ -22,7 +22,7 @@ node *createNode(type Type, std::variant<int, bool> value = UNDEFINED,
                  node *rightTree = NULL, node *next = NULL, node *expr = NULL,
                  node *ifTrue = NULL, node *ifFalse = NULL) {
   node *newNode = new node();
-  cout << newNode << "\n";
+  // cout << newNode << "\n";
   newNode->Type = Type;
   newNode->value = value;
 
@@ -47,22 +47,24 @@ node *createNode(type Type, std::variant<int, bool> value = UNDEFINED,
   return newNode;
 }
 
-std::variant<int, bool> getSymbolValue(
-    const string &name,
-    unordered_map<string, std::variant<int, bool>>
-        &symbol_table) { // just taking string reference, avoiding copy.
-  if (symbol_table.find(name) != symbol_table.end()) {
-    return symbol_table[name];
-  } else {
-    cout << "Error: Undefined symbol '" << name << "'." << endl;
-    return UNDEFINED; // Consider how you want to handle undefined symbols
+std::variant<int, bool>
+getSymbolValue(const string &name,
+               unordered_map<string, std::variant<int, bool>> &symbol_table) {
+  if (symbol_table.find(name) == symbol_table.end()) {
+    cout << "error: " << name << " not declared\n";
+    return UNDEFINED;
   }
+  return symbol_table[name];
 }
+
+int getIntValue(std::variant<int, bool> value) { return std::get<int>(value); }
 
 void setSymbolValue(
     const string &name, std::variant<int, bool> value,
     unordered_map<string, std::variant<int, bool>> symbol_table) {
   symbol_table[name] = value;
+  int x = getIntValue(getSymbolValue(name, symbol_table));
+  cout << "success: " << name << " = " << x << "\n";
 }
 
 void printNode(const node *node) {
@@ -138,7 +140,8 @@ void nodeImage(node *node) {
   cout << "NODE ID : " << node << "\n";
 
   cout << "\n";
-  cout << "Type : " << node->Type << "\nvalue: " << std::get<int>(node->value);
+  // cout << "Type : " << node->Type << "\nvalue: " <<
+  // std::get<int>(node->value);
 
   if (node->name == NULL) {
     cout << "name: NULL\n";
@@ -211,8 +214,6 @@ void printTree(node *stmt_list) {
 //   cout<<"nextStatementEnd\n";
 // }
 //
-
-int getIntValue(std::variant<int, bool> value) { return std::get<int>(value); }
 
 bool getBoolValue(std::variant<int, bool> value) {
   return std::get<bool>(value);

@@ -13,6 +13,7 @@ typedef enum type {
   declarationStmt,
   conditionStmt,
 
+  var,
   add,
   sub,
   mul,
