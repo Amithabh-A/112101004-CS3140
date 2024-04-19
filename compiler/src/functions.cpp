@@ -16,6 +16,7 @@ using namespace std;
  * */
 
 /*Now, errors can come wherever defns like `int value` is written. */
+void printTree(node *stmt_list);
 
 node *createNode(type Type, std::variant<int, bool> value = UNDEFINED,
                  const char *name = NULL, node *leftTree = NULL,
@@ -112,18 +113,90 @@ void printNode(const node *node) {
     break;
   };
 
-    // Add cases for other types as needed
-    //         case condition:
-    //           cout<<"\nCONDITIONAL\nLogical Expression start\n";
-    //           // Logical expression here
-    //           printNode(node->expr);
-    //           cout<<"Logical expression end\n If True, stmt_list here : \n";
-    //           // if stmt_list
-    //           printTree(node->ifTrue);
-    //           cout<<"Over... \n Else stmt_list here: \n";
-    //           // else stmt_list
-    //           printTree(node->ifFalse);
-    //           cout<<"CONDITIONAL block over\n\n";
+  case If:
+    cout << "IF ";
+    printNode(node->expr);
+    printTree(node->ifTrue);
+    break;
+  case IfElse:
+    cout << "IF ";
+    printNode(node->expr);
+    printTree(node->ifTrue);
+    cout << "ELSE ";
+    printTree(node->ifFalse);
+    break;
+  case var:
+    cout << "VAR " << node->name << "\n";
+    break;
+  case constant:
+    cout << "CONSTANT " << std::get<int>(node->value) << "\n";
+  case add:
+    cout << "ADD ";
+    printNode(node->lt);
+    printNode(node->rt);
+    break;
+  case sub:
+    cout << "SUB ";
+    printNode(node->lt);
+    printNode(node->rt);
+    break;
+  case mul:
+    cout << "MUL ";
+    printNode(node->lt);
+    printNode(node->rt);
+    break;
+  case Div:
+    cout << "DIV ";
+    printNode(node->lt);
+    printNode(node->rt);
+    break;
+  // relational operators
+  case lt:
+    cout << "LT ";
+    printNode(node->lt);
+    printNode(node->rt);
+    break;
+  case gt:
+    cout << "GT ";
+    printNode(node->lt);
+    printNode(node->rt);
+    break;
+  case le:
+    cout << "LE ";
+    printNode(node->lt);
+    printNode(node->rt);
+    break;
+  case ge:
+    cout << "GE ";
+    printNode(node->lt);
+    printNode(node->rt);
+    break;
+  case ne:
+    cout << "NE ";
+    printNode(node->lt);
+    printNode(node->rt);
+    break;
+  case eq:
+    cout << "EQ ";
+    printNode(node->lt);
+    printNode(node->rt);
+    break;
+
+  // logical operators
+  case Not:
+    cout << "NOT ";
+    printNode(node->lt);
+    break;
+  case And:
+    cout << "AND ";
+    printNode(node->lt);
+    printNode(node->rt);
+    break;
+  case Or:
+    cout << "OR ";
+    printNode(node->lt);
+    printNode(node->rt);
+    break;
   default:
     cout << "Unknown node type\n";
   }
@@ -187,33 +260,6 @@ void printTree(node *stmt_list) {
   }
   free(temp);
 }
-
-// void printWholeTree(node* node){
-//   if(node == NULL){
-//     cout<<"null node! \n";
-//     return;
-//   }
-//   cout<<"Type : ";
-//   // <<node->Type<<"\n";
-//   switch(node->Type) {
-//     case assign:
-//       cout<<"assign type\n";
-//     case print:
-//       cout<<"print type\n";
-//     case declaration:
-//       cout<<"declaration type\n";
-//     default:
-//       cout<<"error\n";
-//   }
-//   cout<<"left \n";
-//   printWholeTree(node->lt);
-//   cout<<"left end\nright \n";
-//   printWholeTree(node->rt);
-//   cout<<"rightend\nnext statement \n";
-//   printWholeTree(node->next);
-//   cout<<"nextStatementEnd\n";
-// }
-//
 
 bool getBoolValue(std::variant<int, bool> value) {
   return std::get<bool>(value);

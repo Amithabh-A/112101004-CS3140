@@ -4,6 +4,7 @@ typedef enum type {
   assign,
   print,
   declaration,
+  condition,
   If,
   IfElse,
   For,

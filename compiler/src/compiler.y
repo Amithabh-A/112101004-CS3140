@@ -276,7 +276,8 @@ bool getBoolValue(std::variant<int, bool> value);
 	
 	assign_stmt:	var_expr '=' expr
         {
-          setSymbolValue($1->name, $3->value, symbol_table);
+          // setSymbolValue($1->name, $3->value, symbol_table);
+          symbol_table[$1->name] = $3->value;
           $$ = createNode(assign, $3->value, $1->name, $1, $3);
           // cout<<$$<<" This is the address of node of assign stmt. \n";
           // cout<<"An assign node creation\n";
