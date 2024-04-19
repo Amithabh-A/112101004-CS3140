@@ -40,6 +40,8 @@ typedef enum type {
   condition,      // 28
   update,         // 29
 
+  Array // 30
+
 } type;
 
 typedef struct node {

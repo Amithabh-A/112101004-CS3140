@@ -5,6 +5,7 @@
 #include<string>
 #include<cstring>
 #include<unordered_map>
+#include<map>
 #include<vector>
 #include "../include/compiler.h"
 #define UNDEFINED (INT_MAX/2)
@@ -12,6 +13,7 @@ using namespace std;
 int yylex();
 void yyerror( char* );
 unordered_map<string, std::variant<int, bool>>symbol_table;
+map<string, int*>array_table;
 node *globalStatementList;
 vector<const node*>statement_list; 
 
@@ -138,7 +140,9 @@ bool getBoolValue(std::variant<int, bool> value);
 		;
 	
 	Gid	:	VAR		{ 				}
-		|	Gid '[' NUM ']'	{                                                   }
+		|	Gid '[' NUM ']'	
+      {                                                   
+      }
 
 		;
 
@@ -338,9 +342,8 @@ bool getBoolValue(std::variant<int, bool> value);
       }
 		|	var_expr		
       {
-        $$ = createNode(var, getSymbolValue($1->name, symbol_table), $1->name);
         // $$ = createNode(declaration, UNDEFINED, $1->name);
-        // $$ = $1;
+        $$ = $1;
       }
 		|	T			{ 						  	}
 		|	F			{ 	}
@@ -424,8 +427,14 @@ bool getBoolValue(std::variant<int, bool> value);
 	var_expr:	VAR	
       {
         // $$ = createNode(var, getSymbolValue($1->name, symbol_table), $1->name);
+        $$ = createNode(var, getSymbolValue($1->name, symbol_table), $1->name);
       }
-		|	var_expr '[' expr ']'	{                                                 }
+		|	var_expr '[' expr ']'	
+      {                                                 
+        // $$ = createNode(var, getSymbolValue($1->name, symbol_table), $1->name);
+        // $$ = createNode(Array, getIntValue($3->value), $1->name);
+        // array_table[$1->name] = (int*)malloc(getIntValue($3->value)*sizeof(int));
+      }
 		;
 %%
 void yyerror ( char  *s) {
