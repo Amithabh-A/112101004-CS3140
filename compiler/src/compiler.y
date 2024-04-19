@@ -23,12 +23,19 @@ void nodeImage(node *node) ;
 
 
 
+// node *createNode(type Type, std::variant<int, bool> value = UNDEFINED,
+//                  const char *name = NULL, node *leftTree = NULL,
+//                  node *rightTree = NULL, node *next = NULL, node *expr = NULL,
+//                  node *ifTrue = NULL, node *ifFalse = NULL, node *init = NULL,
+//                  node *condition = NULL, node *update = NULL,
+//                  node *body = NULL);
+
 node *createNode(type Type, std::variant<int, bool> value = UNDEFINED,
                  const char *name = NULL, node *leftTree = NULL,
                  node *rightTree = NULL, node *next = NULL, node *expr = NULL,
                  node *ifTrue = NULL, node *ifFalse = NULL, node *init = NULL,
-                 node *condition = NULL, node *update = NULL,
-                 node *body = NULL);
+                 node *condition = NULL, node *update = NULL, node *body = NULL,
+                 node *whilecond = NULL, node *whilestmts = NULL) ;
 
 
 std::variant<int, bool> getSymbolValue(
@@ -233,7 +240,7 @@ bool getBoolValue(std::variant<int, bool> value);
 
             // statement_list.push_back($1);
           }
-		//|	error ';' 	//	{ cout<<"error end \n"; }
+		|	error ';' 		{ cout<<"error stmt_list\n"; }
 		;
 
 	statement:	assign_stmt  ';'	
@@ -261,6 +268,7 @@ bool getBoolValue(std::variant<int, bool> value);
             $$ = createNode(conditionStmt, UNDEFINED, NULL, NULL, $1);
           }
 		|	func_stmt ';'		// { cout<<"func_stmt end\n";}
+    | error ';' {cout<<"error statement\n";}
 		;
 
 	read_stmt:	READ '(' var_expr ')' {						 
@@ -331,10 +339,14 @@ bool getBoolValue(std::variant<int, bool> value);
         {
           $$ = createNode(For, UNDEFINED, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $3, $5, $7, $10);
         }
+    | WHILE '(' expr ')' '{' stmt_list '}'
+        {
+          $$ = createNode(While, UNDEFINED, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $3, $6);
+        }
 
     | error ';' 
         {
-          cout<<"error in for loop\n";
+          cout<<"error in for/while loop\n";
         }
 		;
 	
@@ -471,8 +483,8 @@ extern int yydebug;
 yyparse();
 // cout<<"Size of statement list : "<<statement_list.size()<<"\n";
 nodeImage(globalStatementList);
-// cout<<"\n\n\nprintTree\n";
-// printTree(globalStatementList);
+cout<<"\n\n\nprintTree\n";
+printTree(globalStatementList);
 
 
 

@@ -44,6 +44,8 @@ typedef enum type {
   assignArray, // 31
   assignVar,   // 32
 
+  While, // 33
+
 } type;
 
 typedef struct node {
@@ -63,6 +65,10 @@ typedef struct node {
   node *condition;
   node *update;
   node *body;
+
+  // while stmt
+  node *whilecond;
+  node *whilestmts;
 
   node() {}
 } node;

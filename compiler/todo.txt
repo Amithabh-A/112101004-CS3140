@@ -3,3 +3,8 @@
   end
 
   and all
+
+# test 2
+1. variables of type float and 
+multi dimensional arrays to assignment
+2. while loop

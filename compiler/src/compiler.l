@@ -42,6 +42,9 @@ endif				{
 for 				{
   return FOR;
 				}		
+while 				{
+  return WHILE;
+				}		
 {digit}+  { 	
 //             yylval.val = atoi(yytext);
             yylval.Node->value = atoi(yytext);

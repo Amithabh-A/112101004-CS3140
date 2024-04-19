@@ -18,12 +18,19 @@ using namespace std;
 /*Now, errors can come wherever defns like `int value` is written. */
 void printTree(node *stmt_list);
 
+// node *createNode(type Type, std::variant<int, bool> value = UNDEFINED,
+//                  const char *name = NULL, node *leftTree = NULL,
+//                  node *rightTree = NULL, node *next = NULL, node *expr =
+//                  NULL, node *ifTrue = NULL, node *ifFalse = NULL, node *init
+//                  = NULL, node *condition = NULL, node *update = NULL, node
+//                  *body = NULL) {
+//
 node *createNode(type Type, std::variant<int, bool> value = UNDEFINED,
                  const char *name = NULL, node *leftTree = NULL,
                  node *rightTree = NULL, node *next = NULL, node *expr = NULL,
                  node *ifTrue = NULL, node *ifFalse = NULL, node *init = NULL,
-                 node *condition = NULL, node *update = NULL,
-                 node *body = NULL) {
+                 node *condition = NULL, node *update = NULL, node *body = NULL,
+                 node *whilecond = NULL, node *whilestmts = NULL) {
   node *newNode = new node();
   // cout << newNode << "\n";
   newNode->Type = Type;
@@ -50,6 +57,8 @@ node *createNode(type Type, std::variant<int, bool> value = UNDEFINED,
   newNode->condition = condition;
   newNode->update = update;
   newNode->body = body;
+  newNode->whilecond = whilecond;
+  newNode->whilestmts = whilestmts;
   cout << Type << " statement created. \n";
   return newNode;
 }
@@ -106,7 +115,10 @@ void printNode(const node *node) {
     break;
   }
   case assign:
-    cout << node->name << " " << std::get<int>(node->value) << "\n";
+    // cout << node->name << " " << std::get<int>(node->value) << "\n";
+    cout << node->name << " ";
+    // I might need to print node->lt
+    printNode(node->rt);
     break;
 
   case print: {
@@ -139,11 +151,17 @@ void printNode(const node *node) {
     printNode(node->update);
     printTree(node->body);
     break;
+  case While:
+    cout << "WHILE ";
+    printNode(node->whilecond);
+    printTree(node->whilestmts);
+    break;
   case var:
     cout << "VAR " << node->name << "\n";
     break;
   case constant:
     cout << "CONSTANT " << std::get<int>(node->value) << " ";
+    break;
   case add:
     cout << "ADD ";
     printNode(node->lt);
@@ -313,6 +331,7 @@ void printTree(node *stmt_list) {
     if (temp->Type != assign && temp->Type != eq)
       printNode(temp);
     temp = temp->next;
+    cout << "\n";
   }
   free(temp);
 }
