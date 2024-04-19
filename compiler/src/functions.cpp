@@ -32,6 +32,7 @@ node *createNode(type Type, std::variant<int, bool> value = UNDEFINED,
                  node *condition = NULL, node *update = NULL, node *body = NULL,
                  node *whilecond = NULL, node *whilestmts = NULL) {
   node *newNode = new node();
+  cout << "newNode created " << newNode << "\n";
   // cout << newNode << "\n";
   newNode->Type = Type;
   newNode->value = value;
@@ -331,13 +332,15 @@ void printTree(node *stmt_list) {
     l++;
     temp = temp->next;
   }
+  cout << l << "\n";
   temp = stmt_list;
   while (k < l) {
     // cout << "4\n";
     // cout << temp << "\n";
     k++;
+    cout << temp << " ";
     // NOTE: DEBUG
-    // cout << k << "   type : " << temp->Type << " ";
+    cout << k << "   type : " << temp->Type << " ";
     if (temp->Type != assign && temp->Type != eq)
       printNode(temp);
     temp = temp->next;
