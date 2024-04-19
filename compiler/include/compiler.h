@@ -1,44 +1,44 @@
 #include <variant>
 
 typedef enum type {
-  assign,
-  print,
-  declaration,
-  If,
-  IfElse,
-  For,
+  assign,      // 0
+  print,       // 1
+  declaration, // 2
+  If,          // 3
+  IfElse,      // 4
+  For,         // 5
 
-  assignStmt,
-  printStmt,
-  declarationStmt,
-  conditionStmt,
+  assignStmt,      // 6
+  printStmt,       // 7
+  declarationStmt, // 8
+  conditionStmt,   // 9
 
-  var,
-  add,
-  sub,
-  mul,
-  Div,
+  var, // 10
+  add, // 11
+  sub, // 12
+  mul, // 13
+  Div, // 14
 
-  constant,
+  constant, // 15
 
-  eq,
-  le,
-  ge,
-  lt,
-  gt,
-  ne,
+  eq, // 16
+  le, // 17
+  ge, // 18
+  lt, // 19
+  gt, // 20
+  ne, // 21
 
-  And,
-  Or,
-  Not,
+  And, // 22
+  Or,  // 23
+  Not, // 24
 
-  Int,
-  Bool,
+  Int,  // 25
+  Bool, // 26
 
   // for statement
-  initialisation,
-  condition,
-  update,
+  initialisation, // 27
+  condition,      // 28
+  update,         // 29
 
 } type;
 

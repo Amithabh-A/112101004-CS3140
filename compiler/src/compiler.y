@@ -17,6 +17,7 @@ vector<const node*>statement_list;
 
 void printTree(node *stmt_list);
 void printWholeTree(node* stmt_list);
+void nodeImage(node *node) ;
 
 
 
@@ -213,6 +214,8 @@ bool getBoolValue(std::variant<int, bool> value);
           {		
             $1->next = $2;
             $$ = $1;
+            cout<<$$<<" This is the address of node of stmt_list. \n";
+
             // statement_list.push_back($1);
           }
 		//|	error ';' 	//	{ cout<<"error end \n"; }
@@ -434,8 +437,12 @@ extern int yydebug;
 // yydebug = 1;
 yyparse();
 // cout<<"Size of statement list : "<<statement_list.size()<<"\n";
-cout<<"\n\n\nprintTree\n";
-printTree(globalStatementList);
+nodeImage(globalStatementList);
+// cout<<"\n\n\nprintTree\n";
+// printTree(globalStatementList);
+
+
+
 // cout<<"\n\nInfix Traversal\n";
 if(globalStatementList == NULL)cout<<"haha\n root is null\n";
 // nodeImage(globalStatementList);

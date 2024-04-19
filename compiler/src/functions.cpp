@@ -227,8 +227,7 @@ void nodeImage(node *node) {
   cout << "NODE ID : " << node << "\n";
 
   cout << "\n";
-  // cout << "Type : " << node->Type << "\nvalue: " <<
-  // std::get<int>(node->value);
+  cout << "Type : " << node->Type << "\nvalue: " << std::get<int>(node->value);
 
   if (node->name == NULL) {
     cout << "name: NULL\n";
@@ -264,6 +263,40 @@ void nodeImage(node *node) {
     nodeImage(node->expr);
   }
 
+  if (node->ifTrue == NULL) {
+    cout << "ifTrue: NULL\n";
+  } else {
+    cout << "\nifTrue : \n";
+    nodeImage(node->ifTrue);
+  }
+
+  if (node->ifFalse == NULL) {
+    cout << "ifFalse: NULL\n";
+  } else {
+    cout << "\nifFalse : \n";
+    nodeImage(node->ifFalse);
+  }
+
+  if (node->init == NULL) {
+    cout << "init: NULL\n";
+  } else {
+    cout << "\ninit : \n";
+    nodeImage(node->init);
+  }
+
+  if (node->condition == NULL) {
+    cout << "condition: NULL\n";
+  } else {
+    cout << "\ncondition : \n";
+    nodeImage(node->condition);
+  }
+
+  if (node->update == NULL) {
+    cout << "update: NULL\n";
+  } else {
+    cout << "\nupdate : \n";
+    nodeImage(node->update);
+  }
   cout << "\n";
 }
 
