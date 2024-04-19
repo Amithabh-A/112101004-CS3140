@@ -21,7 +21,9 @@ void printTree(node *stmt_list);
 node *createNode(type Type, std::variant<int, bool> value = UNDEFINED,
                  const char *name = NULL, node *leftTree = NULL,
                  node *rightTree = NULL, node *next = NULL, node *expr = NULL,
-                 node *ifTrue = NULL, node *ifFalse = NULL) {
+                 node *ifTrue = NULL, node *ifFalse = NULL, node *init = NULL,
+                 node *condition = NULL, node *update = NULL,
+                 node *body = NULL) {
   node *newNode = new node();
   // cout << newNode << "\n";
   newNode->Type = Type;
@@ -44,6 +46,10 @@ node *createNode(type Type, std::variant<int, bool> value = UNDEFINED,
   newNode->expr = expr;
   newNode->ifTrue = ifTrue;
   newNode->ifFalse = ifFalse;
+  newNode->init = init;
+  newNode->condition = condition;
+  newNode->update = update;
+  newNode->body = body;
   cout << Type << " statement created. \n";
   return newNode;
 }

@@ -23,7 +23,10 @@ void printWholeTree(node* stmt_list);
 node *createNode(type Type, std::variant<int, bool> value = UNDEFINED,
                  const char *name = NULL, node *leftTree = NULL,
                  node *rightTree = NULL, node *next = NULL, node *expr = NULL,
-                 node *ifTrue = NULL, node *ifFalse = NULL);
+                 node *ifTrue = NULL, node *ifFalse = NULL, node *init = NULL,
+                 node *condition = NULL, node *update = NULL,
+                 node *body = NULL);
+
 
 std::variant<int, bool> getSymbolValue(
     const string &name,
@@ -296,6 +299,7 @@ bool getBoolValue(std::variant<int, bool> value);
         }
     | FOR '(' assign_stmt  ';'  expr ';'  assign_stmt ')' '{' stmt_list '}'     
         {
+          $$ = createNode(For, UNDEFINED, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $3, $5, $7, $10);
         }
 
 		;

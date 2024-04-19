@@ -33,9 +33,12 @@ typedef enum type {
   Not,
 
   Int,
-  Bool
+  Bool,
 
   // for statement
+  initialisation,
+  condition,
+  update,
 
 } type;
 
@@ -50,6 +53,12 @@ typedef struct node {
   node *expr;
   node *ifTrue;
   node *ifFalse;
+
+  // For stmt
+  node *init;
+  node *condition;
+  node *update;
+  node *body;
 
   node() {}
 } node;
