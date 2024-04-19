@@ -127,21 +127,32 @@ bool getBoolValue(std::variant<int, bool> value);
 		
 	Glist 	:	Gid
       {
+         // $$ = createNode(declaration, UNDEFINED, $1->name);
+         // symbol_table[$1->name] = UNDEFINED;
+         // cout<<"variable "<<$1->name<<" is declared\n";
+         $$ = $1;
+      }
+		|	Gid ',' Glist 
+      {
+        // $$ = createNode(declaration, UNDEFINED, $1->name, NULL, $3);
+        // symbol_table[$1->name] = UNDEFINED;
+        // cout<<"variable "<<$1->name<<" is declared\n";
+        $1 -> rt = $3;
+        $$ = $1;
+      }
+		;
+	
+	Gid	:	VAR	
+      { 				
          $$ = createNode(declaration, UNDEFINED, $1->name);
          symbol_table[$1->name] = UNDEFINED;
          cout<<"variable "<<$1->name<<" is declared\n";
       }
-		|	Gid ',' Glist 
-      {
-        $$ = createNode(declaration, UNDEFINED, $1->name, NULL, $3);
-        symbol_table[$1->name] = UNDEFINED;
-        cout<<"variable "<<$1->name<<" is declared\n";
-      }
-		;
-	
-	Gid	:	VAR		{ 				}
-		|	Gid '[' NUM ']'	
+		|	VAR '[' NUM ']'	
       {                                                   
+        $$ = createNode(Array, getIntValue($3->value), $1->name);
+        array_table[$1->name] = (int*)malloc(getIntValue($3->value)*sizeof(int));
+        cout<<"Array "<<$1->name<<" is declared\n";
       }
 
 		;
