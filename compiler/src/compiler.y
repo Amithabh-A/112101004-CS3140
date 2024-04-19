@@ -298,8 +298,20 @@ bool getBoolValue(std::variant<int, bool> value);
 	assign_stmt:	var_expr '=' expr
         {
           // setSymbolValue($1->name, $3->value, symbol_table);
-          symbol_table[$1->name] = $3->value;
-          $$ = createNode(assign, $3->value, $1->name, $1, $3);
+          if($1->Type == assignVar){
+            symbol_table[$1->name] = $3->value;
+            $$ = createNode(assign, $3->value, $1->name, $1, $3);
+          } else {
+            string s = string($1->name);
+            s = s + "[" + to_string(getIntValue($1->value)) + "]";
+            array_table[$1->name][getIntValue($1->value)] = getIntValue($3->value);
+            $$ = createNode(assign, $3->value, s.c_str(), $1, $3);
+          }
+
+
+
+          // symbol_table[$1->name] = $3->value;
+          //  $$ = createNode(assign, $3->value, $1->name, $1, $3);
           // cout<<$$<<" This is the address of node of assign stmt. \n";
           // cout<<"An assign node creation\n";
         }
@@ -438,13 +450,14 @@ bool getBoolValue(std::variant<int, bool> value);
 	var_expr:	VAR	
       {
         // $$ = createNode(var, getSymbolValue($1->name, symbol_table), $1->name);
-        $$ = createNode(var, getSymbolValue($1->name, symbol_table), $1->name);
+        $$ = createNode(assignVar, getSymbolValue($1->name, symbol_table), $1->name);
       }
 		|	var_expr '[' expr ']'	
       {                                                 
         // $$ = createNode(var, getSymbolValue($1->name, symbol_table), $1->name);
         // $$ = createNode(Array, getIntValue($3->value), $1->name);
         // array_table[$1->name] = (int*)malloc(getIntValue($3->value)*sizeof(int));
+        $$ = createNode(assignArray, array_table[$1->name][getIntValue($3->value)], $1->name, NULL, $3);
       }
 		;
 %%

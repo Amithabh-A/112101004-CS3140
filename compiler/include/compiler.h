@@ -40,7 +40,9 @@ typedef enum type {
   condition,      // 28
   update,         // 29
 
-  Array // 30
+  Array,       // 30
+  assignArray, // 31
+  assignVar,   // 32
 
 } type;
 
