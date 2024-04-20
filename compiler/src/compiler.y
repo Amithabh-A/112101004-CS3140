@@ -371,7 +371,7 @@ bool getBoolValue(std::variant<int, bool> value);
             {
               cout<<"Array not declared\n";
               $$ = createNode(error);
-            } else if(sizeof(array_table[$1->name])/sizeof(int) <= getIntValue($1->value)) {
+            } else if(sizeof(array_table[$1->name])/sizeof(int) <= getIntValue($1->value) || getIntValue($1->value) < 0) {
               cout<<"Array out of bounds\n";
               $$ = createNode(error);
             } else {
@@ -585,7 +585,8 @@ bool getBoolValue(std::variant<int, bool> value);
         //} else if(sizeof(array_table[$1->name])/sizeof(int) <= getIntValue($3->value)) {
         //  cout<<"Array out of bounds\n";
         //} else {
-          $$ = createNode(assignArray, array_table[$1->name][getIntValue($3->value)], $1->name, NULL, $3);
+          // $$ = createNode(assignArray, array_table[$1->name][getIntValue($3->value)], $1->name, NULL, $3);
+          $$ = createNode(assignArray, getIntValue($3->value), $1->name, NULL, $3);
           cout << "var_expr - VAR array\n";
         // }
       }
