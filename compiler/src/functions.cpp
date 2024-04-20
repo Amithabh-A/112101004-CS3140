@@ -170,7 +170,7 @@ void printNode(const node *node, int param = 0) {
     cout << "\nENDWHILE\n";
     break;
   case assignVar:
-    cout << "VAR " << node->name << "\n";
+    cout << "VAR " << node->name << " ";
     break;
   case var:
     cout << "VAR " << node->name << " ";
@@ -254,6 +254,8 @@ void printNode(const node *node, int param = 0) {
     // cout << "right type: " << node->rt->Type << "\n";
     // printNode(node->lt, param);
     // printNode(node->rt, param);
+    break;
+  case error:
     break;
   default:
     cout << "Unknown node type" << node->Type << "\n";
@@ -354,7 +356,7 @@ void printTree(node *stmt_list) {
     l++;
     temp = temp->next;
   }
-  cout << l << "\n";
+  // cout << l << "\n";
   temp = stmt_list;
   while (k < l) {
     // cout << "4\n";
@@ -362,7 +364,7 @@ void printTree(node *stmt_list) {
     k++;
     // cout << temp << " ";
     // NOTE: DEBUG
-    cout << k << "   type : " << temp->Type << " ";
+    // cout << k << "   type : " << temp->Type << " ";
     if (temp->Type != assign && temp->Type != eq)
       printNode(temp);
     temp = temp->next;

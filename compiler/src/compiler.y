@@ -95,6 +95,7 @@ bool getBoolValue(std::variant<int, bool> value);
         insertNext($1, $2);
         $$ = $1;
         globalStatementList = $1;
+        cout << "main's type : " << $2->Type << "\n";
       }
       
 //        {cout<<"In Prog\n";}
@@ -260,8 +261,14 @@ bool getBoolValue(std::variant<int, bool> value);
     |	statement stmt_list	
           {		
             insertNext($1, $2);
+            cout << "DEBUG : stmt_list\n";
+            cout << "is_statement : " << is_statement($1->Type) << "\n";
             // $1->next = $2;
-            $$ = $1;
+            if(is_statement($1->Type)) {
+              $$ = $1;
+            } else {
+              $$ = $2;
+            }
             cout<<$$<<" This is the address of node of stmt_list. \ttype : " << $$->Type << "\n";
 
             // statement_list.push_back($1);
@@ -271,11 +278,12 @@ bool getBoolValue(std::variant<int, bool> value);
 
 	statement:	assign_stmt  ';'	
           {
-            $$ = createNode(assignStmt, UNDEFINED, NULL, NULL, $1);
-            cout << "statement - assign_stmt end\n";
             if($1->Type == error) {
               cout<<"Error in assign_stmt\n";
-              $$->Type = error;
+              $$ = createNode(error);
+            } else {
+              $$ = createNode(assignStmt, UNDEFINED, NULL, NULL, $1);
+              cout << "statement - assign_stmt end\n";
             }
           }	
 		|	read_stmt ';'	//	{ cout<<"read_stmt end\n"; }
@@ -362,8 +370,10 @@ bool getBoolValue(std::variant<int, bool> value);
             if(array_table.find($1->name) == array_table.end())
             {
               cout<<"Array not declared\n";
+              $$ = createNode(error);
             } else if(sizeof(array_table[$1->name])/sizeof(int) <= getIntValue($1->value)) {
               cout<<"Array out of bounds\n";
+              $$ = createNode(error);
             } else {
               array_table[$1->name][getIntValue($1->value)] = getIntValue($3->value);
               $$ = createNode(assign, $3->value, $1->name, $1, $3);
