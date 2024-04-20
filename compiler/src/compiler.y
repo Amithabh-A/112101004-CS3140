@@ -83,6 +83,7 @@ bool getBoolValue(std::variant<int, bool> value);
 %type<Node> Gdecl_list
 %type<Node> Gdecl
 %type<Node> ret_type
+%type<Node> ret_stmt
 %type<Node> mymain
 
 
@@ -94,16 +95,19 @@ bool getBoolValue(std::variant<int, bool> value);
         node *temp = $1;
         insertNext($1, $2);
         $$ = $1;
-        globalStatementList = $1;
+        // globalStatementList = $1;
         cout << "main's type : " << $2->Type << "\n";
       }
       
 //        {cout<<"In Prog\n";}
+  | error ';' {cout<<"error in Prog\n";}
   ;
 
-  mymain : BEG stmt_list END {
+  mymain : BEG stmt_list ret_stmt END {
+    insertNext($2, $3);
     $$ = $2; 
   }
+  | error ';' {cout<<"error in mymain\n";}
   ;
 		
 	Gdecl_sec:	DECL Gdecl_list ENDDECL 
@@ -111,6 +115,7 @@ bool getBoolValue(std::variant<int, bool> value);
       $$ = $2;
       // globalStatementList = $2;
     }
+    | error ';' {cout<<"error in Gdecl_sec\n";}
 		;
 		
 	Gdecl_list: 
@@ -173,6 +178,7 @@ bool getBoolValue(std::variant<int, bool> value);
         // $1 -> rt = $3;
         // $$ = $1;
       }
+    | error ';' {cout<<"error in Glist\n";}
 		;
 	
 	Gid	:	VAR	
@@ -187,14 +193,17 @@ bool getBoolValue(std::variant<int, bool> value);
         $$ = createNode(Array, getIntValue($3->value), $1->name);
         array_table[$$->name] = (int*)malloc(getIntValue($$->value)*sizeof(int));
       }
+    | error ';' {cout<<"error in Gid\n";}
 
 		;
 
 	func 	:	VAR '(' arg_list ')' 					{ 					}
+
 		;
 			
 	arg_list:	
 		|	arg_list1
+
 		;
 
 	arg_list1:	arg_list1 ';' arg
@@ -227,7 +236,10 @@ bool getBoolValue(std::variant<int, bool> value);
 	FargList:	arg_list	{ 					}
 		;
 
-	ret_stmt:	RETURN expr ';'	{ 					}
+	ret_stmt:	RETURN expr ';'	
+      { 					
+        $$ = createNode(returnStmt, getIntValue($2->value), NULL, NULL, $2);
+      }
 		;
 			
 	MainBlock: 	func_ret_type main '('')''{' Ldecl_sec BEG stmt_list ret_stmt END  '}'		{ 				  	  }
@@ -303,7 +315,7 @@ bool getBoolValue(std::variant<int, bool> value);
             // cout<<"\n";
           }
 
-		|	cond_stmt 	 
+	|	cond_stmt 	 
           { 
             $$ = createNode(conditionStmt, UNDEFINED, NULL, NULL, $1);
             cout << "statement - cond_stmt end\n";
@@ -320,6 +332,7 @@ bool getBoolValue(std::variant<int, bool> value);
     {// cout<<"write_stmt inside end\n";
       $$ = $3;
     }
+  | error ';' {cout<<"error write_stmt\n";}
   ;
 
   Wlist : Wid 
@@ -336,10 +349,12 @@ bool getBoolValue(std::variant<int, bool> value);
           $$ = createNode(print, getSymbolValue($1->name, symbol_table), $1->name, NULL, $3);
           cout << "Wid - Wlist\n";
         }
+  | error ';' {cout<<"error Wlist\n";}
   ;
 
 	Wid	:	VAR		{ 				}
 		|	Wid '[' NUM ']'	{ }
+    | error ';' {cout<<"error Wid\n";}
 
 		;
 		
@@ -379,55 +394,37 @@ bool getBoolValue(std::variant<int, bool> value);
               $$ = createNode(assign, $3->value, $1->name, $1, $3);
             }
           } 
-
-          // if($1->Type == assignVar){
-          //   symbol_table[$1->name] = $3->value;
-          //   $$ = createNode(assign, $3->value, $1->name, $1, $3);
-          //   cout << "assign_stmt\n";
-          // } else {
-          //   string s = string($1->name);
-          //   s = s + "[" + to_string(getIntValue($1->value)) + "]";
-          //   array_table[$1->name][getIntValue($1->value)] = getIntValue($3->value);
-          //   $$ = createNode(assign, $3->value, s.c_str(), $1, $3);
-          // }
-
-
-
-          // symbol_table[$1->name] = $3->value;
-          //  $$ = createNode(assign, $3->value, $1->name, $1, $3);
-          // cout<<$$<<" This is the address of node of assign stmt. \n";
-          // cout<<"An assign node creation\n";
         }
+    | error ';' {cout<<"error in assign_stmt\n";}
 		;
 
-	cond_stmt:	IF expr '{'stmt_list'}'
-        {  
-          // write code for if statement 
-          $$ = createNode(If, UNDEFINED, NULL, NULL, NULL, NULL, $2, $4);
-          cout << "If stmt\n"
-        }
-		|	IF expr '{'stmt_list'}' ELSE '{'stmt_list'}' 
-        { 						
-          // write code for if else statement
-          $$ = createNode(IfElse , UNDEFINED, NULL, NULL, NULL, NULL, $2, $4, $8);
-          cout << "IfElse stmt\n";
+	cond_stmt:	
+    // IF expr '{'stmt_list'}'
+    //     {  
+    //       // write code for if statement 
+    //       $$ = createNode(If, UNDEFINED, NULL, NULL, NULL, NULL, $2, $4);
+    //       cout << "If stmt\n"
+    //     }
+		// |	IF expr '{'stmt_list'}' ELSE '{'stmt_list'}' 
+    //     { 						
+    //       // write code for if else statement
+    //       $$ = createNode(IfElse , UNDEFINED, NULL, NULL, NULL, NULL, $2, $4, $8);
+    //       cout << "IfElse stmt\n";
 
-        }
-    | FOR '(' assign_stmt  ';'  expr ';'  assign_stmt ')' '{' stmt_list '}'     
+    //     }
+    // | 
+    FOR '(' assign_stmt  ';'  expr ';'  assign_stmt ')' '{' stmt_list '}'     
         {
           $$ = createNode(For, UNDEFINED, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $3, $5, $7, $10);
+          globalStatementList = $$;
           cout << "For stmt\n";
         }
-    | WHILE '(' expr ')' '{' stmt_list '}'
-        {
-          $$ = createNode(While, UNDEFINED, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $3, $6);
-          cout << "While stmt\n";
-        }
-
-    | error ';' 
-        {
-          cout<<"error in for/while loop\n";
-        }
+    // | WHILE '(' expr ')' '{' stmt_list '}'
+    //     {
+    //       $$ = createNode(While, UNDEFINED, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $3, $6);
+    //       cout << "While stmt\n";
+    //     }
+    | error ';' {cout<<"error in cond_stmt\n";}
 		;
 	
 	func_stmt:	func_call 		{ 						}
@@ -559,6 +556,8 @@ bool getBoolValue(std::variant<int, bool> value);
         cout << "or\n";
         }
 
+    | error ';' {cout<<"error in expr\n";}
+
 		;
 	
 	var_expr:	VAR	
@@ -590,6 +589,7 @@ bool getBoolValue(std::variant<int, bool> value);
           cout << "var_expr - VAR array\n";
         // }
       }
+    | error ';' {cout<<"error in var_expr\n";}
 		;
 %%
 void yyerror ( char  *s) {

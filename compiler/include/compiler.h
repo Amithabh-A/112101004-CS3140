@@ -48,6 +48,8 @@ typedef enum type {
   Float, // 34
   error, // 35
 
+  returnStmt, // 36
+
 } type;
 
 typedef struct node {

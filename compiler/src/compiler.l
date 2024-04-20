@@ -52,9 +52,14 @@ begin {
   return BEG;
 }
 
+return {
+  return RETURN;
+}
+
 end {
   return END;
 }
+
 
 ({digit}+\.{digit}+)|({digit}*\.{digit}+)|({digit}+\.{digit}*) {
             yylval.Node->value = atoi(yytext);

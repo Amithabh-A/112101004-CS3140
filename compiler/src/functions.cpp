@@ -34,17 +34,9 @@ node *createNode(type Type, std::variant<int, bool> value = UNDEFINED,
                  node *condition = NULL, node *update = NULL, node *body = NULL,
                  node *whilecond = NULL, node *whilestmts = NULL) {
   node *newNode = new node();
-  cout << "newNode created " << newNode << "\n";
-  // cout << newNode << "\n";
+  // cout << "newNode created " << newNode << "\n";
   newNode->Type = Type;
   newNode->value = value;
-
-  // might be a bug.
-  // This is a hack. Need a refactor in function.
-  // if(newNode->value != UNDEFINED && newNode->Type == declaration) {
-  //   newNode->Type = assign;
-  // }
-
   newNode->name =
       name ? strdup(name) : NULL; // strdup - str dup - string duplicate fn in
                                   // c. Ensure deep copy of name
@@ -62,7 +54,7 @@ node *createNode(type Type, std::variant<int, bool> value = UNDEFINED,
   newNode->body = body;
   newNode->whilecond = whilecond;
   newNode->whilestmts = whilestmts;
-  cout << Type << " statement created. \n";
+  // cout << Type << " statement created. \n";
   return newNode;
 }
 
@@ -257,6 +249,10 @@ void printNode(const node *node, int param = 0) {
     break;
   case error:
     break;
+  case returnStmt:
+    cout << "RETURN ";
+    printNode(node->rt, param);
+    break;
   default:
     cout << "Unknown node type" << node->Type << "\n";
   }
@@ -393,7 +389,7 @@ void insertNext(node *stmt_list, node *stmt) {
 
 bool is_statement(type value) {
   if (value == declarationStmt || value == assignStmt || value == printStmt ||
-      value == conditionStmt) {
+      value == conditionStmt || value == returnStmt) {
     return true;
   }
   return false;
