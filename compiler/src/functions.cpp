@@ -154,6 +154,7 @@ void printNode(const node *node, int param = 0) {
     printNode(node->condition, param);
     printNode(node->update, param);
     printTree(node->body);
+    cout << "ENDFOR\n";
     break;
   case While:
     cout << "\nWHILE\t";

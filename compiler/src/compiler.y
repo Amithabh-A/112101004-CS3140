@@ -95,8 +95,8 @@ bool getBoolValue(std::variant<int, bool> value);
         node *temp = $1;
         insertNext($1, $2);
         $$ = $1;
-        // globalStatementList = $1;
-        cout << "main's type : " << $2->Type << "\n";
+        globalStatementList = $1;
+        // cout << "main's type : " << $2->Type << "\n";
       }
       
 //        {cout<<"In Prog\n";}
@@ -121,7 +121,7 @@ bool getBoolValue(std::variant<int, bool> value);
 	Gdecl_list: 
 		| 	Gdecl Gdecl_list 
         {
-          cout<<"Gdecl_list\n";
+          // cout<<"Gdecl_list\n";
           insertNext($1, $2);
           // $1->next = $2;
           $$ = $1;
@@ -130,7 +130,7 @@ bool getBoolValue(std::variant<int, bool> value);
 		;
 		
   Gdecl 	:	ret_type Glist ';' {
-      cout << "Gdecl\n";
+      // cout << "Gdecl\n";
       // we have to create node for type of variable
       // type can be int or bool
       // Initially we have to create node for type in ret_type. 
@@ -143,23 +143,23 @@ bool getBoolValue(std::variant<int, bool> value);
       { 
         // other than giving type, no info is there for ret_type node. 
         $$ = createNode(Int);
-        cout << "T_INT\n"
+        // cout << "T_INT\n"
       }
     | T_BOOL 
       { 
         $$ = createNode(Bool); 
-        cout << "T_BOOL\n";
+        // cout << "T_BOOL\n";
       }
     | T_FLOAT{
         $$ = createNode(Float);
-        cout << "T_FLOAT\n";
+        // cout << "T_FLOAT\n";
       }
     | error ';' {cout<<"error in ret_type\n";}
 		;
 		
 	Glist 	:	Gid
       {
-        cout << "Glist\n";
+        // cout << "Glist\n";
         $$ = createNode(declaration, UNDEFINED, NULL, $1);
         // globalStatementList = $$;
         // cout << "globalStatementList : " << globalStatementList << "\n";
@@ -170,7 +170,7 @@ bool getBoolValue(std::variant<int, bool> value);
       }
 		|	Gid ',' Glist 
       {
-        cout << "Glist\n";
+        // cout << "Glist\n";
         $$ = createNode(declaration, UNDEFINED, NULL, $1, $3);
         // $$ = createNode(declaration, UNDEFINED, $1->name, NULL, $3);
         // symbol_table[$1->name] = UNDEFINED;
@@ -183,13 +183,13 @@ bool getBoolValue(std::variant<int, bool> value);
 	
 	Gid	:	VAR	
       { 				
-        cout << "Gid\n";
+        // cout << "Gid\n";
         $$ = createNode(var, UNDEFINED, $1->name);
         symbol_table[$$->name] = UNDEFINED;
       }
 		|	VAR '[' NUM ']'	
       {                                                   
-        cout << "Gid\n";
+        // cout << "Gid\n";
         $$ = createNode(Array, getIntValue($3->value), $1->name);
         array_table[$$->name] = (int*)malloc(getIntValue($$->value)*sizeof(int));
       }
@@ -273,15 +273,15 @@ bool getBoolValue(std::variant<int, bool> value);
     |	statement stmt_list	
           {		
             insertNext($1, $2);
-            cout << "DEBUG : stmt_list\n";
-            cout << "is_statement : " << is_statement($1->Type) << "\n";
+            // cout << "DEBUG : stmt_list\n";
+            // cout << "is_statement : " << is_statement($1->Type) << "\n";
             // $1->next = $2;
             if(is_statement($1->Type)) {
               $$ = $1;
             } else {
               $$ = $2;
             }
-            cout<<$$<<" This is the address of node of stmt_list. \ttype : " << $$->Type << "\n";
+            // cout<<$$<<" This is the address of node of stmt_list. \ttype : " << $$->Type << "\n";
 
             // statement_list.push_back($1);
           }
@@ -291,18 +291,18 @@ bool getBoolValue(std::variant<int, bool> value);
 	statement:	assign_stmt  ';'	
           {
             if($1->Type == error) {
-              cout<<"Error in assign_stmt\n";
+              // cout<<"Error in assign_stmt\n";
               $$ = createNode(error);
             } else {
               $$ = createNode(assignStmt, UNDEFINED, NULL, NULL, $1);
-              cout << "statement - assign_stmt end\n";
+              // cout << "statement - assign_stmt end\n";
             }
           }	
 		|	read_stmt ';'	//	{ cout<<"read_stmt end\n"; }
 		|	write_stmt ';'		
           { 
             $$ = createNode(printStmt, UNDEFINED, NULL, NULL, $1);
-            cout << "statement - write_stmt end\n";
+            // cout << "statement - write_stmt end\n";
             // node* temp = $1;
             // some comments deleted. Check commits in April 5. 
 
@@ -318,7 +318,7 @@ bool getBoolValue(std::variant<int, bool> value);
 	|	cond_stmt 	 
           { 
             $$ = createNode(conditionStmt, UNDEFINED, NULL, NULL, $1);
-            cout << "statement - cond_stmt end\n";
+            // cout << "statement - cond_stmt end\n";
           }
 		|	func_stmt ';'		// { cout<<"func_stmt end\n";}
     | error ';' {cout<<"error statement\n";}
@@ -339,7 +339,7 @@ bool getBoolValue(std::variant<int, bool> value);
         {
           // cout<<getSymbolValue($1->name)<<"\n";
           $$ = createNode(print, getSymbolValue($1->name, symbol_table), $1->name);
-          cout << "Wid\n";
+          // cout << "Wid\n";
         }
         
   | Wid ',' Wlist
@@ -347,7 +347,7 @@ bool getBoolValue(std::variant<int, bool> value);
           // $1->value = getSymbolValue($1->name);
           // cout<<getSymbolValue($1->name)<<"\n";
           $$ = createNode(print, getSymbolValue($1->name, symbol_table), $1->name, NULL, $3);
-          cout << "Wid - Wlist\n";
+          // cout << "Wid - Wlist\n";
         }
   | error ';' {cout<<"error Wlist\n";}
   ;
@@ -372,7 +372,7 @@ bool getBoolValue(std::variant<int, bool> value);
             // if not declared, return error.
             if(symbol_table.find($1->name) == symbol_table.end())
             {
-              cout<<"Variable not declared\n";
+              // cout<<"Variable not declared\n";
               $$ = createNode(error);
             } else {
               setSymbolValue($1->name, $3->value, symbol_table);
@@ -384,10 +384,10 @@ bool getBoolValue(std::variant<int, bool> value);
             // if array is declared, check bound of the array. If out of bounds, return error.
             if(array_table.find($1->name) == array_table.end())
             {
-              cout<<"Array not declared\n";
+              // cout<<"Array not declared\n";
               $$ = createNode(error);
             } else if(sizeof(array_table[$1->name])/sizeof(int) <= getIntValue($1->value) || getIntValue($1->value) < 0) {
-              cout<<"Array out of bounds\n";
+              // cout<<"Array out of bounds\n";
               $$ = createNode(error);
             } else {
               array_table[$1->name][getIntValue($1->value)] = getIntValue($3->value);
@@ -399,25 +399,24 @@ bool getBoolValue(std::variant<int, bool> value);
 		;
 
 	cond_stmt:	
-    // IF expr '{'stmt_list'}'
-    //     {  
-    //       // write code for if statement 
-    //       $$ = createNode(If, UNDEFINED, NULL, NULL, NULL, NULL, $2, $4);
-    //       cout << "If stmt\n"
-    //     }
-		// |	IF expr '{'stmt_list'}' ELSE '{'stmt_list'}' 
-    //     { 						
-    //       // write code for if else statement
-    //       $$ = createNode(IfElse , UNDEFINED, NULL, NULL, NULL, NULL, $2, $4, $8);
-    //       cout << "IfElse stmt\n";
+    IF expr '{'stmt_list'}'
+        {  
+          // write code for if statement 
+          $$ = createNode(If, UNDEFINED, NULL, NULL, NULL, NULL, $2, $4);
+          // cout << "If stmt\n"
+        }
+		|	IF expr '{'stmt_list'}' ELSE '{'stmt_list'}' 
+        { 						
+          // write code for if else statement
+          $$ = createNode(IfElse , UNDEFINED, NULL, NULL, NULL, NULL, $2, $4, $8);
+          // cout << "IfElse stmt\n";
 
-    //     }
-    // | 
-    FOR '(' assign_stmt  ';'  expr ';'  assign_stmt ')' '{' stmt_list '}'     
+        }
+    | FOR '(' assign_stmt  ';'  expr ';'  assign_stmt ')' '{' stmt_list '}'     
         {
           $$ = createNode(For, UNDEFINED, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $3, $5, $7, $10);
-          globalStatementList = $$;
-          cout << "For stmt\n";
+          //  globalStatementList = $$;
+          // cout << "For stmt\n";
         }
     // | WHILE '(' expr ')' '{' stmt_list '}'
     //     {
@@ -447,13 +446,13 @@ bool getBoolValue(std::variant<int, bool> value);
 	expr	:	NUM 
       { 
           $$ = createNode(constant, $1->value);
-          cout << "NUM\n";
+          // cout << "NUM\n";
       }
     | FLOAT {}
 		|	'-' NUM	%prec UMINUS
       { 
           $$ = createNode(constant, (-1)*std::get<int>($2->value));
-          cout << "- NUM\n";
+          // cout << "- NUM\n";
       }
 		|	'-' FLOAT	%prec UMINUS {}
 		|	var_expr		
@@ -476,17 +475,17 @@ bool getBoolValue(std::variant<int, bool> value);
 		|	expr '+' expr 
         {
           $$ = createNode(add, getIntValue($1->value)  + getIntValue($3->value), NULL, $1, $3, NULL);
-          cout << "plus\n";
+          // cout << "plus\n";
         }
 		|	expr '-' expr
         {
           $$ = createNode(sub, getIntValue($1->value) - getIntValue($3->value), NULL, $1, $3, NULL);
-          cout << "minus\n";
+          // cout << "minus\n";
         }
 		|	expr '*' expr
         {
           $$ = createNode(mul, getIntValue($1->value) * getIntValue($3->value), NULL, $1, $3, NULL);
-          cout << "mul\n";
+          // cout << "mul\n";
         }
 		|	expr '/' expr
         {
@@ -496,44 +495,44 @@ bool getBoolValue(std::variant<int, bool> value);
             exit(1);
           }
           $$ = createNode(Div, (int)(getIntValue($1->value) / getIntValue($3->value)), NULL, $1, $3, NULL);
-          cout << "div\n";
+          // cout << "div\n";
         }
 // 		|	expr '%' expr 		{ 						}
 		|	expr '<' expr		
         { 						
           // $$ = createNode(lt, $1->value < $3->value, leftTree = $1, rightTree = $3);
           $$ = createNode(lt, getIntValue($1->value) < getIntValue($3->value), NULL, $1, $3);
-          cout << "lt\n";
+          // cout << "lt\n";
         }
 		|	expr '>' expr		
         { 						
         //   $$ = createNode(gt, truthVal = $1->value > $3->value, leftTree = $1, rightTree = $3);
         $$ = createNode(gt, getIntValue($1->value) > getIntValue($3->value), NULL, $1, $3);
-        cout << "gt\n";
+        // cout << "gt\n";
         }
 		|	expr GREATERTHANOREQUAL expr			
         { 						
         //   $$ = createNode(ge, truthVal = $1->value >= $3->value, leftTree = $1, rightTree = $3);
         $$ = createNode(ge, getIntValue($1->value) >= getIntValue($3->value), NULL, $1, $3);
-        cout << "ge\n";
+        // cout << "ge\n";
         }
 		|	expr LESSTHANOREQUAL expr	
         { 						
         //   $$ = createNode(le, truthVal = $1->value <= $3->value, leftTree = $1, rightTree = $3);
         $$ = createNode(le, getIntValue($1->value) <= getIntValue($3->value), NULL, $1, $3);
-        cout << "le\n";
+        // cout << "le\n";
         }
 		|	expr NOTEQUAL expr		
         { 						
         //   $$ = createNode(ne, truthVal = $1->value != $3->value, leftTree = $1, rightTree = $3);
         $$ = createNode(ne, getIntValue($1->value) != getIntValue($3->value), NULL, $1, $3);
-        cout << "ne\n";
+        // cout << "ne\n";
         }
 		|	expr EQUALEQUAL expr	
         { 					
         //   $$ = createNode(eq, truthVal = $1->value == $3->value, leftTree = $1, rightTree = $3);
         $$ = createNode(eq, getIntValue($1->value) == getIntValue($3->value), NULL, $1, $3);
-        cout << "eq\n";
+        // cout << "eq\n";
         }
 		|	LOGICAL_NOT expr	
         { 					
@@ -541,19 +540,19 @@ bool getBoolValue(std::variant<int, bool> value);
         // even if we write UNDEFINED in the position of node->value, no problem is there, because
         // we are just building an AST. 
         $$ = createNode(Not, !getBoolValue($2->value), NULL, NULL, $2);
-        cout << "not\n";
+        // cout << "not\n";
         }
 		|	expr LOGICAL_AND expr	
         { 					
         //   $$ = createNode(And, truthVal = $1->value && $3->value, leftTree = $1, rightTree = $3);
         $$ = createNode(And,getBoolValue($1->value) && getBoolValue($3->value), NULL, $1, $3);
-        cout << "and\n";
+        // cout << "and\n";
         }
 		|	expr LOGICAL_OR expr	
         { 					
         //   $$ = createNode(Or, truthVal = $1->value || $3->value, leftTree = $1, rightTree = $3);
         $$ = createNode(Or, getBoolValue($1->value) || getBoolValue($3->value), NULL, $1, $3);
-        cout << "or\n";
+        // cout << "or\n";
         }
 
     | error ';' {cout<<"error in expr\n";}
@@ -570,7 +569,7 @@ bool getBoolValue(std::variant<int, bool> value);
         //   cout<<"Variable not declared\n";
         // } else {
         $$ = createNode(assignVar, getSymbolValue($1->name, symbol_table), $1->name);
-        cout << "var_expr - VAR\n";
+        // cout << "var_expr - VAR\n";
         //}
       }
 		|	var_expr '[' expr ']'	
@@ -586,7 +585,7 @@ bool getBoolValue(std::variant<int, bool> value);
         //} else {
           // $$ = createNode(assignArray, array_table[$1->name][getIntValue($3->value)], $1->name, NULL, $3);
           $$ = createNode(assignArray, getIntValue($3->value), $1->name, NULL, $3);
-          cout << "var_expr - VAR array\n";
+          // cout << "var_expr - VAR array\n";
         // }
       }
     | error ';' {cout<<"error in var_expr\n";}

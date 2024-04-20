@@ -49,6 +49,7 @@ typedef enum type {
   error, // 35
 
   returnStmt, // 36
+  loopingStmt // 37
 
 } type;
 
