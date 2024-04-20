@@ -93,8 +93,9 @@ void printNode(const node *node, int param = 0) {
   switch (node->Type) {
   case declarationStmt:
     cout << "DECLARATION ";
-    cout << "left type: " << node->lt->Type << " right type: " << node->rt->Type
-         << "\n";
+    // cout << "left type: " << node->lt->Type << " right type: " <<
+    // node->rt->Type
+    //      << "\n";
     printNode(node->lt, param);
     printNode(node->rt, param);
     break;
@@ -111,10 +112,10 @@ void printNode(const node *node, int param = 0) {
     printNode(node->rt, param);
     break;
   case declaration: {
-    cout << "before going to var or array\n";
-    cout << "type of left tree: " << node->lt->Type << "\n";
+    // cout << "before going to var or array\n";
+    // cout << "type of left tree: " << node->lt->Type << "\n";
     printNode(node->lt, param); // var or array
-    cout << "after going to var or array\n";
+    // cout << "after going to var or array\n";
     printNode(node->rt, param);
     break;
   }
@@ -126,6 +127,10 @@ void printNode(const node *node, int param = 0) {
     printNode(node->rt, param);
     // I might need to print node->lt
     // printNode(node->rt);
+    break;
+  case assignArray:
+    cout << "ARRAY " << node->name << "[" << getIntValue(node->value) << "] ";
+    // printNode(node->rt, param);
     break;
 
   case print: {
@@ -263,10 +268,11 @@ void nodeImage(node *node) {
     cout << "nullvalue\n";
     return;
   }
-  cout << "NODE ID : " << node << "\n";
+  // cout << "NODE ID : " << node << "\n";
 
   cout << "\n";
-  cout << "Type : " << node->Type << "\nvalue: " << std::get<int>(node->value);
+  // cout << "Type : " << node->Type << "\nvalue: " <<
+  // std::get<int>(node->value);
 
   if (node->name == NULL) {
     cout << "name: NULL\n";
@@ -354,9 +360,9 @@ void printTree(node *stmt_list) {
     // cout << "4\n";
     // cout << temp << "\n";
     k++;
-    cout << temp << " ";
+    // cout << temp << " ";
     // NOTE: DEBUG
-    cout << k << "   type : " << temp->Type << " ";
+    // cout << k << "   type : " << temp->Type << " ";
     if (temp->Type != assign && temp->Type != eq)
       printNode(temp);
     temp = temp->next;

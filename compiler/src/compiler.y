@@ -92,16 +92,9 @@ bool getBoolValue(std::variant<int, bool> value);
       {
         // we have to go through GdeclList and append mymain at the end of GdeclList. 
         node *temp = $1;
-        
         insertNext($1, $2);
-
-        // while(temp->next != NULL)
-        // {
-        //   temp = temp->next;
-        // }
-        // temp->next = $2;
         $$ = $1;
-        // globalStatementList = $1;
+        globalStatementList = $1;
       }
       
 //        {cout<<"In Prog\n";}
@@ -160,7 +153,10 @@ bool getBoolValue(std::variant<int, bool> value);
 		
 	Glist 	:	Gid
       {
-        $$ = createNode(declaration, UNDEFINED);
+        cout << "Glist\n";
+        $$ = createNode(declaration, UNDEFINED, NULL, $1);
+        // globalStatementList = $$;
+        // cout << "globalStatementList : " << globalStatementList << "\n";
          // $$ = createNode(declaration, UNDEFINED, $1->name);
          // symbol_table[$1->name] = UNDEFINED;
          // cout<<"variable "<<$1->name<<" is declared\n";
@@ -168,9 +164,8 @@ bool getBoolValue(std::variant<int, bool> value);
       }
 		|	Gid ',' Glist 
       {
+        cout << "Glist\n";
         $$ = createNode(declaration, UNDEFINED, NULL, $1, $3);
-        globalStatementList = $$;
-        cout << "globalStatementList : " << globalStatementList << "\n";
         // $$ = createNode(declaration, UNDEFINED, $1->name, NULL, $3);
         // symbol_table[$1->name] = UNDEFINED;
         // cout<<"variable "<<$1->name<<" is declared\n";
@@ -181,22 +176,15 @@ bool getBoolValue(std::variant<int, bool> value);
 	
 	Gid	:	VAR	
       { 				
+        cout << "Gid\n";
         $$ = createNode(var, UNDEFINED, $1->name);
-         /// $$ = createNode(declaration, UNDEFINED, $1->name);
-         /// cout << "Gid - VAR\n";
-         /// symbol_table[$1->name] = UNDEFINED;
-         /// cout<<"variable "<<$1->name<<" is declared\n";
+        symbol_table[$$->name] = UNDEFINED;
       }
 		|	VAR '[' NUM ']'	
       {                                                   
+        cout << "Gid\n";
         $$ = createNode(Array, getIntValue($3->value), $1->name);
-        // nodeImage($1);
-
-        // $$ = createNode(Array, getIntValue($3->value), $1->name, $1, $3);
-        // cout << "Gid - VAR array\n";
-        // cout << "left Type : " << $$->lt->Type << "\nRight Type : " << $$->rt->Type << "\n";
-        // array_table[$1->name] = (int*)malloc(getIntValue($3->value)*sizeof(int));
-        // cout<<"Array "<<$1->name<<" is declared\n";
+        array_table[$$->name] = (int*)malloc(getIntValue($$->value)*sizeof(int));
       }
 
 		;
@@ -556,7 +544,7 @@ extern int yydebug;
 // yydebug = 1;
 yyparse();
 // cout<<"Size of statement list : "<<statement_list.size()<<"\n";
-// nodeImage(globalStatementList);
+nodeImage(globalStatementList);
 cout<<"\n\n\nprintTree\n";
 printTree(globalStatementList);
 
