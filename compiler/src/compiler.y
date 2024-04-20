@@ -273,6 +273,10 @@ bool getBoolValue(std::variant<int, bool> value);
           {
             $$ = createNode(assignStmt, UNDEFINED, NULL, NULL, $1);
             cout << "statement - assign_stmt end\n";
+            if($1->Type == error) {
+              cout<<"Error in assign_stmt\n";
+              $$->Type = error;
+            }
           }	
 		|	read_stmt ';'	//	{ cout<<"read_stmt end\n"; }
 		|	write_stmt ';'		
@@ -337,16 +341,45 @@ bool getBoolValue(std::variant<int, bool> value);
 	assign_stmt:	var_expr '=' expr
         {
           // setSymbolValue($1->name, $3->value, symbol_table);
-          if($1->Type == assignVar){
-            symbol_table[$1->name] = $3->value;
-            $$ = createNode(assign, $3->value, $1->name, $1, $3);
-            cout << "assign_stmt\n";
-          } else {
-            string s = string($1->name);
-            s = s + "[" + to_string(getIntValue($1->value)) + "]";
-            array_table[$1->name][getIntValue($1->value)] = getIntValue($3->value);
-            $$ = createNode(assign, $3->value, s.c_str(), $1, $3);
-          }
+
+          
+          // Two cases : var and array
+          if($1->Type == assignVar) {
+            // we have to check whether variable is declared or not.
+            // if not declared, return error.
+            if(symbol_table.find($1->name) == symbol_table.end())
+            {
+              cout<<"Variable not declared\n";
+              $$ = createNode(error);
+            } else {
+              setSymbolValue($1->name, $3->value, symbol_table);
+              $$ = createNode(assign, $3->value, $1->name, $1, $3);
+            }
+          } else if($1->Type == assignArray) {
+            // we have to check whether array is declared or not.
+            // if not declared, return error.
+            // if array is declared, check bound of the array. If out of bounds, return error.
+            if(array_table.find($1->name) == array_table.end())
+            {
+              cout<<"Array not declared\n";
+            } else if(sizeof(array_table[$1->name])/sizeof(int) <= getIntValue($1->value)) {
+              cout<<"Array out of bounds\n";
+            } else {
+              array_table[$1->name][getIntValue($1->value)] = getIntValue($3->value);
+              $$ = createNode(assign, $3->value, $1->name, $1, $3);
+            }
+          } 
+
+          // if($1->Type == assignVar){
+          //   symbol_table[$1->name] = $3->value;
+          //   $$ = createNode(assign, $3->value, $1->name, $1, $3);
+          //   cout << "assign_stmt\n";
+          // } else {
+          //   string s = string($1->name);
+          //   s = s + "[" + to_string(getIntValue($1->value)) + "]";
+          //   array_table[$1->name][getIntValue($1->value)] = getIntValue($3->value);
+          //   $$ = createNode(assign, $3->value, s.c_str(), $1, $3);
+          // }
 
 
 
@@ -521,17 +554,30 @@ bool getBoolValue(std::variant<int, bool> value);
 	var_expr:	VAR	
       {
         // $$ = createNode(var, getSymbolValue($1->name, symbol_table), $1->name);
+        // semantics 
+        // check whether variable is declared, if not return error.
+        // if (symbol_table.find($1->name) == symbol_table.end())
+        // {
+        //   cout<<"Variable not declared\n";
+        // } else {
         $$ = createNode(assignVar, getSymbolValue($1->name, symbol_table), $1->name);
         cout << "var_expr - VAR\n";
+        //}
       }
 		|	var_expr '[' expr ']'	
       {                                                 
-
-        // $$ = createNode(var, getSymbolValue($1->name, symbol_table), $1->name);
-        // $$ = createNode(Array, getIntValue($3->value), $1->name);
-        // array_table[$1->name] = (int*)malloc(getIntValue($3->value)*sizeof(int));
-        $$ = createNode(assignArray, array_table[$1->name][getIntValue($3->value)], $1->name, NULL, $3);
-        cout << "var_expr - VAR array\n";
+        // semantics
+        // check whether array is declared, if not return error. 
+        // if array is declared, check bound of the array. If out of bounds, return error.
+        //if(array_table.find($1->name) == array_table.end())
+        //{
+        //  cout<<"Array not declared\n";
+        //} else if(sizeof(array_table[$1->name])/sizeof(int) <= getIntValue($3->value)) {
+        //  cout<<"Array out of bounds\n";
+        //} else {
+          $$ = createNode(assignArray, array_table[$1->name][getIntValue($3->value)], $1->name, NULL, $3);
+          cout << "var_expr - VAR array\n";
+        // }
       }
 		;
 %%

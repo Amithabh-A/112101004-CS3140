@@ -362,7 +362,7 @@ void printTree(node *stmt_list) {
     k++;
     // cout << temp << " ";
     // NOTE: DEBUG
-    // cout << k << "   type : " << temp->Type << " ";
+    cout << k << "   type : " << temp->Type << " ";
     if (temp->Type != assign && temp->Type != eq)
       printNode(temp);
     temp = temp->next;

@@ -46,6 +46,7 @@ typedef enum type {
 
   While, // 33
   Float, // 34
+  error, // 35
 
 } type;
 
