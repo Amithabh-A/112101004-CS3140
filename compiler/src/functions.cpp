@@ -90,6 +90,7 @@ void printNode(const node *node, int param = 0) {
     //      << "\n";
     printNode(node->lt, param);
     printNode(node->rt, param);
+    cout << "\n";
     break;
   case assignStmt:
     cout << "ASSIGN ";
@@ -100,8 +101,11 @@ void printNode(const node *node, int param = 0) {
     printNode(node->rt, param);
     break;
   case conditionStmt:
-    cout << "CONDITION ";
+    cout << "\nCONDITION ";
     printNode(node->rt, param);
+    break;
+  case breakStmt:
+    cout << "\nBREAK ";
     break;
   case declaration: {
     // cout << "before going to var or array\n";
@@ -136,25 +140,30 @@ void printNode(const node *node, int param = 0) {
   };
 
   case If:
-    cout << "IF ";
+    cout << "\nIF ";
     printNode(node->expr, param);
+    cout << "\n";
     printTree(node->ifTrue);
+    cout << "\nENDIF\n";
     break;
   case IfElse:
-    cout << "IF ";
+    cout << "\nIF ";
     printNode(node->expr, param);
+    cout << "\n";
     printTree(node->ifTrue);
-    cout << "ELSE ";
+    cout << "\nELSE\n";
     printTree(node->ifFalse);
+    cout << "\nENDIF\n";
     break;
 
   case For:
-    cout << "FOR ";
+    cout << "\nFOR ";
     printNode(node->init, param);
     printNode(node->condition, param);
     printNode(node->update, param);
+    cout << "\n";
     printTree(node->body);
-    cout << "ENDFOR\n";
+    cout << "\nENDFOR\n";
     break;
   case While:
     cout << "\nWHILE\t";
@@ -172,7 +181,7 @@ void printNode(const node *node, int param = 0) {
     cout << "INT ";
     break;
   case constant:
-    cout << "CONSTANT " << std::get<int>(node->value) << "\n";
+    cout << "CONSTANT " << std::get<int>(node->value) << " ";
     break;
   case add:
     cout << "ADD ";
@@ -253,6 +262,9 @@ void printNode(const node *node, int param = 0) {
   case returnStmt:
     cout << "RETURN ";
     printNode(node->rt, param);
+    break;
+  case null:
+    cout << "NULL ";
     break;
   default:
     cout << "Unknown node type" << node->Type << "\n";
@@ -390,7 +402,7 @@ void insertNext(node *stmt_list, node *stmt) {
 
 bool is_statement(type value) {
   if (value == declarationStmt || value == assignStmt || value == printStmt ||
-      value == conditionStmt || value == returnStmt) {
+      value == conditionStmt || value == returnStmt || value == breakStmt) {
     return true;
   }
   return false;

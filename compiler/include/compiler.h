@@ -48,8 +48,11 @@ typedef enum type {
   Float, // 34
   error, // 35
 
-  returnStmt, // 36
-  loopingStmt // 37
+  returnStmt,  // 36
+  loopingStmt, // 37
+
+  null,      // 38
+  breakStmt, // 39
 
 } type;
 

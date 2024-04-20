@@ -48,6 +48,9 @@ for 				{
 while 				{
   return WHILE;
 				}		
+break 				{
+  return BREAK;
+        }
 begin {
   return BEG;
 }
@@ -83,6 +86,7 @@ end {
 "AND" {return LOGICAL_AND;}
 "OR" {return LOGICAL_OR;}
 "NOT" {return LOGICAL_NOT;}
+"++"  { return T_PLUS_PLUS; }
 [-+*/=()><;,\{\}\[\]\%] { return *yytext; }
 ["]                             { }
 "\\n"                           {
