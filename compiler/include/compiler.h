@@ -54,6 +54,10 @@ typedef enum type {
   null,      // 38
   breakStmt, // 39
 
+  Prog,                 // 40
+  declaration_stmtlist, // 41
+  main,                 // 42
+
 } type;
 
 typedef struct node {
@@ -74,9 +78,11 @@ typedef struct node {
   node *update;    // an incr stmt
   node *body;      // stmt_list
 
-  // while stmt
-  node *whilecond;
-  node *whilestmts;
+  node *returnStmt;
+
+  //// while stmt
+  // node *whilecond;
+  // node *whilestmts;
 
   node() {}
 } node;

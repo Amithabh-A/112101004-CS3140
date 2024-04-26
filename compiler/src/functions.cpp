@@ -4,8 +4,8 @@
 #include <unordered_map>
 #include <variant>
 
-#define UNDEFINED (INT_MAX / 2)
-#define NOT_ASSIGNED INT_MIN
+#define UNDEFINED INT_MAX
+#define NOT_INITIALIZED INT_MIN
 
 using namespace std;
 void printTree(node *stmt_list);
@@ -16,7 +16,7 @@ node *createNode(type Type, std::variant<int, bool> value = UNDEFINED,
                  node *rightTree = NULL, node *next = NULL, node *expr = NULL,
                  node *ifTrue = NULL, node *ifFalse = NULL, node *init = NULL,
                  node *condition = NULL, node *update = NULL, node *body = NULL,
-                 node *whilecond = NULL, node *whilestmts = NULL) {
+                 node *returnStmt = NULL) {
   node *newNode = new node();
   newNode->Type = Type;
   newNode->value = value;
@@ -35,8 +35,6 @@ node *createNode(type Type, std::variant<int, bool> value = UNDEFINED,
   newNode->condition = condition;
   newNode->update = update;
   newNode->body = body;
-  newNode->whilecond = whilecond;
-  newNode->whilestmts = whilestmts;
   return newNode;
 }
 
@@ -61,179 +59,179 @@ void setSymbolValue(
 }
 
 void printNode(const node *node, int param = 0) {
-  if (node == NULL)
-    return;
-  const struct node *temp;
-  switch (node->Type) {
-  case declarationStmt:
-    cout << "DECLARATION ";
-    printNode(node->lt, param);
-    printNode(node->rt, param);
-    cout << "\n";
-    break;
-  case assignStmt:
-    cout << "ASSIGN ";
-    printNode(node->rt, param);
-    break;
-  case printStmt:
-    cout << "PRINT ";
-    printNode(node->rt, param);
-    break;
-  case conditionStmt:
-    cout << "\nCONDITION ";
-    printNode(node->rt, param);
-    break;
-  case breakStmt:
-    cout << "\nBREAK ";
-    break;
-  case declaration: {
-    printNode(node->lt, param); // var or array
-    printNode(node->rt, param);
-    break;
-  }
-  case assign:
-    printNode(node->lt, param);
-    printNode(node->rt, param);
-    break;
-  case assignArray:
-    cout << "ARRAY " << node->name << "[" << getIntValue(node->value) << "] ";
-    break;
+  // if (node == NULL)
+  //   return;
+  // const struct node *temp;
+  // switch (node->Type) {
+  // case declarationStmt:
+  //   cout << "DECLARATION ";
+  //   printNode(node->lt, param);
+  //   printNode(node->rt, param);
+  //   cout << "\n";
+  //   break;
+  // case assignStmt:
+  //   cout << "ASSIGN ";
+  //   printNode(node->rt, param);
+  //   break;
+  // case printStmt:
+  //   cout << "PRINT ";
+  //   printNode(node->rt, param);
+  //   break;
+  // case conditionStmt:
+  //   cout << "\nCONDITION ";
+  //   printNode(node->rt, param);
+  //   break;
+  // case breakStmt:
+  //   cout << "\nBREAK ";
+  //   break;
+  // case declaration: {
+  //   printNode(node->lt, param); // var or array
+  //   printNode(node->rt, param);
+  //   break;
+  // }
+  // case assign:
+  //   printNode(node->lt, param);
+  //   printNode(node->rt, param);
+  //   break;
+  // case assignArray:
+  //   cout << "ARRAY " << node->name << "[" << getIntValue(node->value) << "]
+  //   "; break;
 
-  case print: {
-    temp = node;
-    while (temp != NULL) {
-      cout << temp->name << " ";
-      temp = temp->rt;
-    }
-    cout << "\n";
-    break;
-  };
+  // case print: {
+  //   temp = node;
+  //   while (temp != NULL) {
+  //     cout << temp->name << " ";
+  //     temp = temp->rt;
+  //   }
+  //   cout << "\n";
+  //   break;
+  // };
 
-  case If:
-    cout << "\nIF ";
-    printNode(node->expr, param);
-    cout << "\n";
-    printTree(node->ifTrue);
-    cout << "\nENDIF\n";
-    break;
-  case IfElse:
-    cout << "\nIF ";
-    printNode(node->expr, param);
-    cout << "\n";
-    printTree(node->ifTrue);
-    cout << "\nELSE\n";
-    printTree(node->ifFalse);
-    cout << "\nENDIF\n";
-    break;
+  // case If:
+  //   cout << "\nIF ";
+  //   printNode(node->expr, param);
+  //   cout << "\n";
+  //   printTree(node->ifTrue);
+  //   cout << "\nENDIF\n";
+  //   break;
+  // case IfElse:
+  //   cout << "\nIF ";
+  //   printNode(node->expr, param);
+  //   cout << "\n";
+  //   printTree(node->ifTrue);
+  //   cout << "\nELSE\n";
+  //   printTree(node->ifFalse);
+  //   cout << "\nENDIF\n";
+  //   break;
 
-  case For:
-    cout << "\nFOR ";
-    printNode(node->init, param);
-    printNode(node->condition, param);
-    printNode(node->update, param);
-    cout << "\n";
-    printTree(node->body);
-    cout << "\nENDFOR\n";
-    break;
-  case While:
-    cout << "\nWHILE\t";
-    printNode(node->whilecond, param + 2);
-    printTree(node->whilestmts);
-    cout << "\nENDWHILE\n";
-    break;
-  case assignVar:
-    cout << "VAR " << node->name << " ";
-    break;
-  case var:
-    cout << "VAR " << node->name << " ";
-    break;
-  case Int:
-    cout << "INT ";
-    break;
-  case constant:
-    cout << "CONSTANT " << std::get<int>(node->value) << " ";
-    break;
-  case add:
-    cout << "ADD ";
-    printNode(node->lt, param);
-    printNode(node->rt, param);
-    break;
-  case sub:
-    cout << "SUB ";
-    printNode(node->lt, param);
-    printNode(node->rt, param);
-    break;
-  case mul:
-    cout << "MUL ";
-    printNode(node->lt, param);
-    printNode(node->rt, param);
-    break;
-  case Div:
-    cout << "DIV ";
-    printNode(node->lt, param);
-    printNode(node->rt, param);
-    break;
-  // relational operators
-  case lt:
-    cout << "LT ";
-    printNode(node->lt, param);
-    printNode(node->rt, param);
-    break;
-  case gt:
-    cout << "GT ";
-    printNode(node->lt, param);
-    printNode(node->rt, param);
-    break;
-  case le:
-    cout << "LE ";
-    printNode(node->lt, param);
-    printNode(node->rt, param);
-    break;
-  case ge:
-    cout << "GE ";
-    printNode(node->lt, param);
-    printNode(node->rt, param);
-    break;
-  case ne:
-    cout << "NE ";
-    printNode(node->lt, param);
-    printNode(node->rt, param);
-    break;
-  case eq:
-    cout << "EQ ";
-    printNode(node->lt, param);
-    printNode(node->rt, param);
-    break;
-  // logical operators
-  case Not:
-    cout << "NOT ";
-    printNode(node->lt, param);
-    break;
-  case And:
-    cout << "AND ";
-    printNode(node->lt, param);
-    printNode(node->rt, param);
-    break;
-  case Or:
-    cout << "OR ";
-    printNode(node->lt, param);
-    printNode(node->rt, param);
-    break;
-  case Array:
-    cout << "ARRAY " << node->name << " " << getIntValue(node->value) << "\n";
-    break;
-  case error:
-    break;
-  case returnStmt:
-    cout << "RETURN ";
-    printNode(node->rt, param);
-    break;
-  case null:
-    cout << "NULL ";
-    break;
-  default:
-    cout << "Unknown node type" << node->Type << "\n";
-  }
+  // case For:
+  //   cout << "\nFOR ";
+  //   printNode(node->init, param);
+  //   printNode(node->condition, param);
+  //   printNode(node->update, param);
+  //   cout << "\n";
+  //   printTree(node->body);
+  //   cout << "\nENDFOR\n";
+  //   break;
+  // case While:
+  //   cout << "\nWHILE\t";
+  //   printNode(node->whilecond, param + 2);
+  //   printTree(node->whilestmts);
+  //   cout << "\nENDWHILE\n";
+  //   break;
+  // case assignVar:
+  //   cout << "VAR " << node->name << " ";
+  //   break;
+  // case var:
+  //   cout << "VAR " << node->name << " ";
+  //   break;
+  // case Int:
+  //   cout << "INT ";
+  //   break;
+  // case constant:
+  //   cout << "CONSTANT " << std::get<int>(node->value) << " ";
+  //   break;
+  // case add:
+  //   cout << "ADD ";
+  //   printNode(node->lt, param);
+  //   printNode(node->rt, param);
+  //   break;
+  // case sub:
+  //   cout << "SUB ";
+  //   printNode(node->lt, param);
+  //   printNode(node->rt, param);
+  //   break;
+  // case mul:
+  //   cout << "MUL ";
+  //   printNode(node->lt, param);
+  //   printNode(node->rt, param);
+  //   break;
+  // case Div:
+  //   cout << "DIV ";
+  //   printNode(node->lt, param);
+  //   printNode(node->rt, param);
+  //   break;
+  // // relational operators
+  // case lt:
+  //   cout << "LT ";
+  //   printNode(node->lt, param);
+  //   printNode(node->rt, param);
+  //   break;
+  // case gt:
+  //   cout << "GT ";
+  //   printNode(node->lt, param);
+  //   printNode(node->rt, param);
+  //   break;
+  // case le:
+  //   cout << "LE ";
+  //   printNode(node->lt, param);
+  //   printNode(node->rt, param);
+  //   break;
+  // case ge:
+  //   cout << "GE ";
+  //   printNode(node->lt, param);
+  //   printNode(node->rt, param);
+  //   break;
+  // case ne:
+  //   cout << "NE ";
+  //   printNode(node->lt, param);
+  //   printNode(node->rt, param);
+  //   break;
+  // case eq:
+  //   cout << "EQ ";
+  //   printNode(node->lt, param);
+  //   printNode(node->rt, param);
+  //   break;
+  // // logical operators
+  // case Not:
+  //   cout << "NOT ";
+  //   printNode(node->lt, param);
+  //   break;
+  // case And:
+  //   cout << "AND ";
+  //   printNode(node->lt, param);
+  //   printNode(node->rt, param);
+  //   break;
+  // case Or:
+  //   cout << "OR ";
+  //   printNode(node->lt, param);
+  //   printNode(node->rt, param);
+  //   break;
+  // case Array:
+  //   cout << "ARRAY " << node->name << " " << getIntValue(node->value) <<
+  //   "\n"; break;
+  // case error:
+  //   break;
+  // case returnStmt:
+  //   cout << "RETURN ";
+  //   printNode(node->rt, param);
+  //   break;
+  // case null:
+  //   cout << "NULL ";
+  //   break;
+  // default:
+  //   cout << "Unknown node type" << node->Type << "\n";
+  // }
 }
 
 void nodeImage(node *node) {

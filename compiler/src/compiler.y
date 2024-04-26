@@ -9,7 +9,8 @@
 #include<vector>
 #include "../include/compiler.h"
 #include <type_traits>
-#define UNDEFINED (INT_MAX/2)
+#define UNDEFINED INT_MAX
+#define NOT_INITIALIZED INT_MIN
 using namespace std;
 int yylex();
 void yyerror( char* );
@@ -21,7 +22,7 @@ unordered_map<string, std::variant<int, bool>>symbol_table;
 void printTree(node *stmt_list);
 void printWholeTree(node* stmt_list);
 void nodeImage(node *node) ;
-bool is_statement(type value) ;
+bool is_statement(type value);
 void insertNext(node *stmt_list, node *stmt) ;
 
 node *createNode(type Type, std::variant<int, bool> value = UNDEFINED,
@@ -29,7 +30,7 @@ node *createNode(type Type, std::variant<int, bool> value = UNDEFINED,
                  node *rightTree = NULL, node *next = NULL, node *expr = NULL,
                  node *ifTrue = NULL, node *ifFalse = NULL, node *init = NULL,
                  node *condition = NULL, node *update = NULL, node *body = NULL,
-                 node *whilecond = NULL, node *whilestmts = NULL) ;
+                 node *returnStmt = NULL);
 
 std::variant<int, bool> getSymbolValue(
     const string &name,
@@ -45,9 +46,9 @@ bool getBoolValue(std::variant<int, bool> value);
 %union{
   struct node* Node;
 }
-%token<Node> VAR NUM FLOAT WRITE
+%token<Node> VAR NUM WRITE
 %token BEG END
-%token T_INT T_BOOL T_FLOAT
+%token T_INT T_BOOL
 %token READ 
 %token DECL ENDDECL
 %token IF THEN ELSE ENDIF
@@ -81,37 +82,28 @@ bool getBoolValue(std::variant<int, bool> value);
 
 %%
 
-	Prog	:	Gdecl_sec mymain
-      {
-        // node *temp = $1;
-        // insertNext($1, $2);
-        // $$ = $1;
-        // globalStatementList = $1;
-      }
+	Prog	:	Gdecl_sec mymain { $$ = createNode(Prog, UNDEFINED, NULL, $1, $2);}
   | error ';' {cout<<"error in Prog\n";}
   ;
 
+	Gdecl_sec:	DECL Gdecl_list ENDDECL { $$ = createNode(declaration_stmtlist, UNDEFINED, NULL, NULL, NULL, $2);}// Gdecl_sec == decl_stmtlist
+    | error ';' {cout<<"error in Gdecl_sec\n";}
+		;
+
   mymain : BEG stmt_list ret_stmt END {
-    // insertNext($2, $3);
-    // $$ = $2; 
+    $$ = createNode(main, UNDEFINED, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $2, $3);
   }
   | error ';' {cout<<"error in mymain\n";}
   ;
 		
-	Gdecl_sec:	DECL Gdecl_list ENDDECL { $$ = $2; }
-    | error ';' {cout<<"error in Gdecl_sec\n";}
-		;
-		
 	Gdecl_list: 
-		| 	Gdecl Gdecl_list 
+		| 	Gdecl Gdecl_list  // Ddecl == decl_stmt
         {
-          // insertNext($1, $2);
-          // $$ = $1;
         }
     | error ';' {cout<<"error in Gdecl_list\n";}
 		;
 		
-  Gdecl 	:	ret_type Glist ';' // { $$ = createNode(declarationStmt, UNDEFINED, NULL, $1, $2); }
+  Gdecl 	:	ret_type Glist ';' // ret_type == type, Glist == decl_nodelist
     | error ';' {cout<<"error in Gdecl\n";}
 		;
 		
@@ -142,31 +134,17 @@ bool getBoolValue(std::variant<int, bool> value);
 	ret_stmt:	RETURN expr ';'// 	{ $$ = createNode(returnStmt, getIntValue($2->value), NULL, NULL, $2); }
 		;
 			
-	stmt_list:	/* NULL */		{  }
-    |	statement stmt_list	
-          {		
-            // insertNext($1, $2);
-            // if(is_statement($1->Type)) {
-            //   $$ = $1;
-            // } else {
-            //   $$ = $2;
-            // }
-          }
+	stmt_list: statement stmt_list	{
+        $$ = $1;
+        $$->next = $2;
+      }
 		|	error ';' 		{ cout<<"error stmt_list\n"; }
 		;
 
-	statement:	assign_stmt  ';'	
-          {
-            // if($1->Type == error) {
-            //   $$ = createNode(error);
-            // } else if ($1->Type == null) {
-            //   $$ = createNode(null);
-            // } else {
-            //   $$ = createNode(assignStmt, UNDEFINED, NULL, NULL, $1);
-            // }
-          }	
-		|	write_stmt ';' // { $$ = createNode(printStmt, UNDEFINED, NULL, NULL, $1); }
-	|	cond_stmt // { $$ = createNode(conditionStmt, UNDEFINED, NULL, NULL, $1);}
+	statement:	
+    assign_stmt  ';'	{ $$ = $1; }
+		|	write_stmt ';'  { $$ = $1; }
+	  |	cond_stmt // { $$ = createNode(conditionStmt, UNDEFINED, NULL, NULL, $1);}
     | break_stmt ';' // { $$ = $1;}
     | error ';' {cout<<"error statement\n";}
 		;
@@ -174,7 +152,10 @@ bool getBoolValue(std::variant<int, bool> value);
   break_stmt: BREAK // { $$ = createNode(breakStmt); }
 
 
-  write_stmt: WRITE '(' Wlist ')' // { $$ = $3;}
+  write_stmt: WRITE '(' Wlist ')' 
+    {
+      $$ = createNode(printStmt, UNDEFINED, NULL, NULL, $3);
+    }
   | error ';' {cout<<"error write_stmt\n";}
   ;
 
@@ -191,54 +172,11 @@ bool getBoolValue(std::variant<int, bool> value);
 		
 	assign_stmt:	var_expr '=' expr
         {
-          // if($1->Type == assignVar) {
-          //   if(symbol_table.find($1->name) == symbol_table.end())
-          //   {
-          //     $$ = createNode(error);
-          //   } else {
-          //     setSymbolValue($1->name, $3->value, symbol_table);
-          //     $$ = createNode(assign, $3->value, $1->name, $1, $3);
-          //   }
-          // } else if($1->Type == assignArray) {
-          //   if(array_table.find($1->name) == array_table.end())
-          //   {
-          //     cout<<"Array not declared\n";
-          //     $$ = createNode(error);
-          //   } else if(sizeof(array_table[$1->name])/sizeof(int) <= getIntValue($1->value) || getIntValue($1->value) < 0) {
-          //     cout<<"Array out of bounds\n";
-          //     $$ = createNode(error);
-          //   } else {
-          //     array_table[$1->name][getIntValue($1->value)] = getIntValue($3->value);
-          //     $$ = createNode(assign, $3->value, $1->name, $1, $3);
-          //   }
-          // } 
+          $$ = createNode(assignStmt, UNDEFINED, NULL, $1, $3);
         }
     | var_expr T_PLUS_PLUS 
       {
-        // if($1->Type == assignVar) {
-        //  if(symbol_table.find($1->name) == symbol_table.end())
-        //   {
-        //     cout<<"Variable not declared\n";
-        //     $$ = createNode(error);
-        //   } else {
-        //     int val = getIntValue(getSymbolValue($1->name, symbol_table)) + 1;
-        //     node *Node = createNode(add, val+1, NULL, $1, createNode(constant, 1));
-        //     $$ = createNode(assign, val, $1->name, $1, Node);
-        //   }
-        // } else if($1->Type == assignArray) {
-        //   if(array_table.find($1->name) == array_table.end())
-        //   {
-        //     cout<<"Array not declared\n";
-        //     $$ = createNode(error);
-        //   } else if(sizeof(array_table[$1->name])/sizeof(int) <= getIntValue($1->value) || getIntValue($1->value) < 0) {
-        //     cout<<"Array out of bounds\n";
-        //     $$ = createNode(error);
-        //   } else {
-        //     array_table[$1->name][getIntValue($1->value)] = getIntValue(array_table[$1->name][getIntValue($1->value)]) + 1;
-        //     node *Node = createNode(add, getIntValue(array_table[$1->name][getIntValue($1->value)]), NULL, $1, createNode(constant, 1));
-        //     $$ = createNode(assign, Node->value, $1->name, $1, Node);
-        //   }
-        // }
+        // define this after expr definitions. 
       }
     | // {$$ = createNode(null);}
     | error ';' {cout<<"error in assign_stmt\n";}
