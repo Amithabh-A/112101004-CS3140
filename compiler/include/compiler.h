@@ -69,10 +69,10 @@ typedef struct node {
   node *ifFalse;
 
   // For stmt
-  node *init;
-  node *condition;
-  node *update;
-  node *body;
+  node *init;      // an assign stmt
+  node *condition; // an expr
+  node *update;    // an incr stmt
+  node *body;      // stmt_list
 
   // while stmt
   node *whilecond;

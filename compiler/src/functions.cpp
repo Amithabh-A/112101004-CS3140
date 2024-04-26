@@ -5,28 +5,12 @@
 #include <variant>
 
 #define UNDEFINED (INT_MAX / 2)
+#define NOT_ASSIGNED INT_MIN
 
 using namespace std;
-
-/*
- *The class template std::variant represents a type-safe union. An instance of
- *std::variant at any given time either holds a value of one of its alternative
- *types, or in the case of error - no value (this state is hard to achieve, see
- *valueless_by_exception).
- * */
-
-/*Now, errors can come wherever defns like `int value` is written. */
 void printTree(node *stmt_list);
-// template <typename T> bool is_statement(T value);
 bool is_statement(type value);
 
-// node *createNode(type Type, std::variant<int, bool> value = UNDEFINED,
-//                  const char *name = NULL, node *leftTree = NULL,
-//                  node *rightTree = NULL, node *next = NULL, node *expr =
-//                  NULL, node *ifTrue = NULL, node *ifFalse = NULL, node
-//                  *init = NULL, node *condition = NULL, node *update = NULL,
-//                  node *body = NULL) {
-//
 node *createNode(type Type, std::variant<int, bool> value = UNDEFINED,
                  const char *name = NULL, node *leftTree = NULL,
                  node *rightTree = NULL, node *next = NULL, node *expr = NULL,
@@ -34,7 +18,6 @@ node *createNode(type Type, std::variant<int, bool> value = UNDEFINED,
                  node *condition = NULL, node *update = NULL, node *body = NULL,
                  node *whilecond = NULL, node *whilestmts = NULL) {
   node *newNode = new node();
-  // cout << "newNode created " << newNode << "\n";
   newNode->Type = Type;
   newNode->value = value;
   newNode->name =
@@ -54,7 +37,6 @@ node *createNode(type Type, std::variant<int, bool> value = UNDEFINED,
   newNode->body = body;
   newNode->whilecond = whilecond;
   newNode->whilestmts = whilestmts;
-  // cout << Type << " statement created. \n";
   return newNode;
 }
 
@@ -85,9 +67,6 @@ void printNode(const node *node, int param = 0) {
   switch (node->Type) {
   case declarationStmt:
     cout << "DECLARATION ";
-    // cout << "left type: " << node->lt->Type << " right type: " <<
-    // node->rt->Type
-    //      << "\n";
     printNode(node->lt, param);
     printNode(node->rt, param);
     cout << "\n";
@@ -108,25 +87,16 @@ void printNode(const node *node, int param = 0) {
     cout << "\nBREAK ";
     break;
   case declaration: {
-    // cout << "before going to var or array\n";
-    // cout << "type of left tree: " << node->lt->Type << "\n";
     printNode(node->lt, param); // var or array
-    // cout << "after going to var or array\n";
     printNode(node->rt, param);
     break;
   }
   case assign:
-    // cout << node->name << " " << std::get<int>(node->value) << "\n";
-    // cout << node->name << " " << getIntValue(node->value);
-    // cout << node->name << " ";
     printNode(node->lt, param);
     printNode(node->rt, param);
-    // I might need to print node->lt
-    // printNode(node->rt);
     break;
   case assignArray:
     cout << "ARRAY " << node->name << "[" << getIntValue(node->value) << "] ";
-    // printNode(node->rt, param);
     break;
 
   case print: {
@@ -234,7 +204,6 @@ void printNode(const node *node, int param = 0) {
     printNode(node->lt, param);
     printNode(node->rt, param);
     break;
-
   // logical operators
   case Not:
     cout << "NOT ";
@@ -252,10 +221,6 @@ void printNode(const node *node, int param = 0) {
     break;
   case Array:
     cout << "ARRAY " << node->name << " " << getIntValue(node->value) << "\n";
-    // cout << "left type: " << node->lt->Type << "\n";
-    // cout << "right type: " << node->rt->Type << "\n";
-    // printNode(node->lt, param);
-    // printNode(node->rt, param);
     break;
   case error:
     break;
@@ -272,19 +237,11 @@ void printNode(const node *node, int param = 0) {
 }
 
 void nodeImage(node *node) {
-  /*
-  gives idea of entire node tree
-  */
   if (node == NULL) {
     cout << "nullvalue\n";
     return;
   }
-  // cout << "NODE ID : " << node << "\n";
-
   cout << "\n";
-  // cout << "Type : " << node->Type << "\nvalue: " <<
-  // std::get<int>(node->value);
-
   if (node->name == NULL) {
     cout << "name: NULL\n";
   } else {
@@ -356,7 +313,6 @@ void nodeImage(node *node) {
   cout << "\n";
 }
 
-// printTree :: stmt_list ->
 void printTree(node *stmt_list) {
   int l = 0;
   int k = 0;
@@ -365,13 +321,9 @@ void printTree(node *stmt_list) {
     l++;
     temp = temp->next;
   }
-  // cout << l << "\n";
   temp = stmt_list;
   while (k < l) {
-    // cout << "4\n";
-    // cout << temp << "\n";
     k++;
-    // cout << temp << " ";
     // NOTE: DEBUG
     // cout << k << "   type : " << temp->Type << " ";
     if (temp->Type != assign && temp->Type != eq)
