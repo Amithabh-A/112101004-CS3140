@@ -1,15 +1,15 @@
 #include <variant>
 
 typedef enum type {
-  assign,      // 0
-  print,       // 1
-  declaration, // 2
-  If,          // 3
-  IfElse,      // 4
-  For,         // 5
+  assign,          // 0
+  print,           // 1
+  declarationNode, // 2
+  ifStmt,          // 3
+  ifElseStmt,      // 4
+  forStmt,         // 5
 
   assignStmt,      // 6
-  printStmt,       // 7
+  writeStmt,       // 7
   declarationStmt, // 8
   conditionStmt,   // 9
 
@@ -40,9 +40,9 @@ typedef enum type {
   condition,      // 28
   update,         // 29
 
-  Array,       // 30
-  assignArray, // 31
-  assignVar,   // 32
+  Array,    // 30
+  writeVar, // 31
+  writeArr, // 32
 
   While, // 33
   Float, // 34
@@ -51,12 +51,17 @@ typedef enum type {
   returnStmt,  // 36
   loopingStmt, // 37
 
-  null,      // 38
+  nullStmt,  // 38
   breakStmt, // 39
 
   Prog,                 // 40
   declaration_stmtlist, // 41
   main,                 // 42
+
+  declVar,   // 43
+  declArray, // 44
+
+  incStmt, // 45
 
 } type;
 

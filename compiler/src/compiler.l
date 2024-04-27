@@ -24,8 +24,6 @@ enddecl {
 integer {
     return T_INT;
   }
-float {
-  return T_FLOAT;
 }
 print {
     return WRITE;
@@ -64,9 +62,6 @@ end {
 }
 
 
-({digit}+\.{digit}+)|({digit}*\.{digit}+)|({digit}+\.{digit}*) {
-            yylval.Node->value = atoi(yytext);
-            return FLOAT;
 }
 {digit}+  { 	
 //             yylval.val = atoi(yytext);

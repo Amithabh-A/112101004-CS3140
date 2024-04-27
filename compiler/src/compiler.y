@@ -4,9 +4,9 @@
 #include<iostream>
 #include<string>
 #include<cstring>
-#include<unordered_map>
-#include<map>
-#include<vector>
+#include<algorithm>
+#include<pair>
+#nclude<vector>
 #include "../include/compiler.h"
 #include <type_traits>
 #define UNDEFINED INT_MAX
@@ -41,6 +41,10 @@ void setSymbolValue(const string &name, std::variant<int, bool> value,
 void printNode(const node *node) ;
 int getIntValue(std::variant<int, bool> value);
 bool getBoolValue(std::variant<int, bool> value);
+
+void set_array(string name, pair<int *, int> p) ;
+void set_array_element(string name, int index, int value) ;
+
 
 %}
 %union{
@@ -91,6 +95,12 @@ bool getBoolValue(std::variant<int, bool> value);
 		;
 
   mymain : BEG stmt_list ret_stmt END {
+    /*
+      main is divided into two parts : 
+      1. body - handled by `body` used by for loop
+      2. return statement - seperate node
+
+    */
     $$ = createNode(main, UNDEFINED, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $2, $3);
   }
   | error ';' {cout<<"error in mymain\n";}
@@ -99,33 +109,55 @@ bool getBoolValue(std::variant<int, bool> value);
 	Gdecl_list: 
 		| 	Gdecl Gdecl_list  // Ddecl == decl_stmt
         {
+          $$ = $1;
+          $$->next = $2;
         }
     | error ';' {cout<<"error in Gdecl_list\n";}
 		;
 		
   Gdecl 	:	ret_type Glist ';' // ret_type == type, Glist == decl_nodelist
+      {
+        $$ = createNode(declarationStmt, UNDEFINED, NULL, $1, $2);
+      }
     | error ';' {cout<<"error in Gdecl\n";}
 		;
 		
 	ret_type:	T_INT // { $$ = createNode(Int); }
+      {
+        $$ = createNode(Int);
+      }
     | T_BOOL // { $$ = createNode(Bool); }
+      {
+        $$ = createNode(Bool);
+      }
     | error ';' {cout<<"error in ret_type\n";}
 		;
 		
-	Glist 	:	Gid // { $$ = createNode(declaration, UNDEFINED, NULL, $1); }
-		|	Gid ',' Glist // { $$ = createNode(declaration, UNDEFINED, NULL, $1, $3); }
+	Glist 	:	Gid 
+      {
+        /*
+          here, Gid is the node. It can be a var declaration or an array declaration. 
+        */
+        $$ = $1;
+      }
+		|	Gid ',' Glist 
+      {
+        $$ = $1;
+        $$->next = $3;
+      }
     | error ';' {cout<<"error in Glist\n";}
 		;
 	
 	Gid	:	VAR	
       { 				
-        // $$ = createNode(var, UNDEFINED, $1->name);
-        // symbol_table[$$->name] = UNDEFINED;
+        $$ = createNode(declVar, NOT_INITIALIZED, $1->name);
+        setSymbolValue($1->name, NOT_INITIALIZED, symbol_table);
       }
 		|	VAR '[' NUM ']'	
       {                                                   
-        // $$ = createNode(Array, getIntValue($3->value), $1->name);
-        // array_table[$$->name] = (int*)malloc(getIntValue($$->value)*sizeof(int));
+        // value of the node is the bound of the array. 
+        $$ = createNode(declArray, getIntValue($3->value), $1->name);
+        set_array($1->name, make_pair(new int[getIntValue($3->value)], getIntValue($3->value)));
       }
     | error ';' {cout<<"error in Gid\n";}
 
@@ -142,9 +174,18 @@ bool getBoolValue(std::variant<int, bool> value);
 		;
 
 	statement:	
-    assign_stmt  ';'	{ $$ = $1; }
-		|	write_stmt ';'  { $$ = $1; }
-	  |	cond_stmt // { $$ = createNode(conditionStmt, UNDEFINED, NULL, NULL, $1);}
+    assign_stmt  ';' 
+      {
+        $$ = $1;
+      }
+		|	write_stmt ';'  
+      {
+        $$ = $1;
+      }
+	  |	cond_stmt 
+      {
+        $$ = $1;
+      }
     | break_stmt ';' // { $$ = $1;}
     | error ';' {cout<<"error statement\n";}
 		;
@@ -154,73 +195,118 @@ bool getBoolValue(std::variant<int, bool> value);
 
   write_stmt: WRITE '(' Wlist ')' 
     {
-      $$ = createNode(printStmt, UNDEFINED, NULL, NULL, $3);
+      $$ = createNode(writeStmt, UNDEFINED, NULL, NULL, $3);
     }
   | error ';' {cout<<"error write_stmt\n";}
   ;
 
-  Wlist : Wid//  { $$ = createNode(print, getSymbolValue($1->name, symbol_table), $1->name); }
-  | Wid ',' Wlist // { $$ = createNode(print, getSymbolValue($1->name, symbol_table), $1->name, NULL, $3);}
+  Wlist : Wid 
+    {
+      $$ = $1;
+    }
+  | Wid ',' Wlist
+    {
+      $$ = $1;
+      $$->next = $3;
+    }
   | error ';' {cout<<"error Wlist\n";}
   ;
 
-	Wid	:	VAR		{ 				}
-		|	Wid '[' NUM ']'	{ }
+	Wid	:	VAR 
+      {
+        $$ = createNode(writeVar, getSymbolValue($1->name, symbol_table), $1->name);
+      }
+		|	Wid '[' NUM ']'	
+      {
+        $$ = createNode(writeArr, getIntValue($3->value) , $1->name, NULL, $3);
+        get_array_element($1->name, getIntValue($3->value))
+      }
     | error ';' {cout<<"error Wid\n";}
 
 		;
 		
 	assign_stmt:	var_expr '=' expr
         {
-          $$ = createNode(assignStmt, UNDEFINED, NULL, $1, $3);
+          $$ = creteNode(assignStmt, UNDEFINED, NULL, $1, NULL, NULL, $3);
+          // trying to assign here : 
+          // switch($1->Type) {
+          //   case var:
+          //     setSymbolValue($1->name, $3->value, symbol_table);
+          //     break; 
+          //   case Array:
+          //     set_array_element($1->name, getIntValue($1->value), getIntValue($3->value));
+          //     break;
+          //   default:
+          //     cout<<"error in assign_stmt\n";
+          //     break;
+          // }
         }
     | var_expr T_PLUS_PLUS 
       {
-        // define this after expr definitions. 
+        $$ = createNode(incStmt, UNDEFINED, NULL, $1);
+        /*
+          write the semantics later. 
+          */
       }
-    | // {$$ = createNode(null);}
+    | $$ = createNode(nullStmt);
     | error ';' {cout<<"error in assign_stmt\n";}
 		;
 
 	cond_stmt:	
-    IF expr '{'stmt_list'}' // { $$ = createNode(If, UNDEFINED, NULL, NULL, NULL, NULL, $2, $4);}
-		|	IF expr '{'stmt_list'}' ELSE '{'stmt_list'}'//  { $$ = createNode(IfElse , UNDEFINED, NULL, NULL, NULL, NULL, $2, $4, $8);}
-    | FOR '(' assign_stmt  ';'  expr ';'  assign_stmt ')' '{' stmt_list '}' // { $$ = createNode(For, UNDEFINED, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $3, $5, $7, $10);}
+    IF expr '{'stmt_list'}'
+      {
+        $$ = createNode(ifStmt, UNDEFINED, NULL, NULL, NULL, NULL, $2, $4);
+      }
+		|	IF expr '{'stmt_list'}' ELSE '{'stmt_list'}'
+      {
+        $$ = createNode(ifElseStmt, UNDEFINED, NULL, NULL, NULL, NULL, $2, $4, $8);
+      }
+    | FOR '(' assign_stmt  ';'  expr ';'  assign_stmt ')' '{' stmt_list '}' 
+      {
+        $$ = createNode(forStmt, UNDEFINED, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $3, $5, $7, $10);
+      }
     | error ';' {cout<<"error in cond_stmt\n";}
 		;
 	
-	expr	:	NUM // { $$ = createNode(constant, $1->value);}
-		|	'-' NUM	%prec UMINUS // { $$ = createNode(constant, (-1)*std::get<int>($2->value));}
-		|	var_expr // { $$ = $1;}
+	expr	:	NUM { $$ = createNode(constant, std::stoi($1));}
+		|	'-' NUM	%prec UMINUS { $$ = createNode(constant, -std::stoi($2));}
+		|	var_expr {$$ = $1;}
 		|	T			{ 						  	}
 		|	F			{ 	}
-		|	'(' expr ')'	// { $$ = $2;}
-		|	expr '+' expr // { $$ = createNode(add, getIntValue($1->value)  + getIntValue($3->value), NULL, $1, $3, NULL);}
-		|	expr '-' expr // { $$ = createNode(sub, getIntValue($1->value) - getIntValue($3->value), NULL, $1, $3, NULL);}
-		|	expr '*' expr // { $$ = createNode(mul, getIntValue($1->value) * getIntValue($3->value), NULL, $1, $3, NULL);}
-		|	expr '/' expr
-        {
-          // if(getIntValue($3->value) == 0)
-          // {
-          //   cout<<"ZeroDivisionError\n";
-          //   exit(1);
-          // }
-          // $$ = createNode(Div, (int)(getIntValue($1->value) / getIntValue($3->value)), NULL, $1, $3, NULL);
+		|	'(' expr ')'	{ $$ = $2;}
+		|	expr '+' expr { $$ = createNode(add, getIntValue($1->value) + getIntValue($3->value), NULL, $1, $3);}
+		|	expr '-' expr { $$ = createNode(sub, getIntValue($1->value) - getIntValue($3->value), NULL, $1, $3);}
+		|	expr '*' expr { $$ = createNode(mul, UNDEFINED, NULL, $1, $3);}
+		|	expr '/' expr 
+      {
+        $$ = createNode(div, UNDEFINED, NULL, $1, $3);
+        if(getIntValue($3->value) == 0) {
+          cout<<"Division by zero\n";
+        } else {
+          $$->value = getIntValue($1->value) / getIntValue($3->value);
         }
-		|	expr '<' expr	// { $$ = createNode(lt, getIntValue($1->value) < getIntValue($3->value), NULL, $1, $3);}
-		|	expr '>' expr	// { $$ = createNode(gt, getIntValue($1->value) > getIntValue($3->value), NULL, $1, $3);}
-		|	expr GREATERTHANOREQUAL expr // { $$ = createNode(ge, getIntValue($1->value) >= getIntValue($3->value), NULL, $1, $3);}
-		|	expr LESSTHANOREQUAL expr	// { $$ = createNode(le, getIntValue($1->value) <= getIntValue($3->value), NULL, $1, $3);}
-		|	expr NOTEQUAL expr //{ $$ = createNode(ne, getIntValue($1->value) != getIntValue($3->value), NULL, $1, $3);}
-		|	expr EQUALEQUAL expr // { $$ = createNode(eq, getIntValue($1->value) == getIntValue($3->value), NULL, $1, $3);}
-		|	LOGICAL_NOT expr // { $$ = createNode(Not, !getBoolValue($2->value), NULL, NULL, $2);}
-		|	expr LOGICAL_AND expr	// { $$ = createNode(And,getBoolValue($1->value) && getBoolValue($3->value), NULL, $1, $3);}
-		|	expr LOGICAL_OR expr // { $$ = createNode(Or, getBoolValue($1->value) || getBoolValue($3->value), NULL, $1, $3);}
+      }
+		|	expr '<' expr	{ $$ = createNode(lt, getIntValue($1->value) < getIntValue($3->value), NULL, $1, $3);}
+		|	expr '>' expr	{ $$ = createNode(gt, getIntValue($1->value) > getIntValue($3->value), NULL, $1, $3);}
+		|	expr GREATERTHANOREQUAL expr { $$ = createNode(ge, getIntValue($1->value) >= getIntValue($3->value), NULL, $1, $3);}
+		|	expr LESSTHANOREQUAL expr	{ $$ = createNode(le, getIntValue($1->value) <= getIntValue($3->value), NULL, $1, $3);}
+		|	expr NOTEQUAL expr { $$ = createNode(ne, getIntValue($1->value) != getIntValue($3->value), NULL, $1, $3);}
+		|	expr EQUALEQUAL expr { $$ = createNode(eq, getIntValue($1->value) == getIntValue($3->value), NULL, $1, $3);}
+		|	LOGICAL_NOT expr { $$ = createNode(Not, !getBoolValue($2->value), NULL, NULL, $2);}
+		|	expr LOGICAL_AND expr	{ $$ = createNode(And, getBoolValue($1->value) && getBoolValue($3->value), NULL, $1, $3);}
+		|	expr LOGICAL_OR expr { $$ = createNode(Or, getBoolValue($1->value) || getBoolValue($3->value), NULL, $1, $3);}
     | error ';' {cout<<"error in expr\n";}
 		;
 	
 	var_expr:	VAR	// { $$ = createNode(assignVar, getSymbolValue($1->name, symbol_table), $1->name);}
+      {
+        $$ = createNode(var, getSymbolValue($1->name, symbol_table), $1->name);
+      }
 		|	var_expr '[' expr ']'	// { $$ = createNode(assignArray, getIntValue($3->value), $1->name, NULL, $3);}
+      {
+        $$ = createNode(Array, getIntValue($3->value), $1->name);
+        get_array($1->name);
+      }
     | error ';' {cout<<"error in var_expr\n";}
 		;
 %%
