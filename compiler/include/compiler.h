@@ -61,7 +61,8 @@ typedef enum type {
   declVar,   // 43
   declArray, // 44
 
-  incStmt, // 45
+  incStmt,    // 45
+  specialArr, // 46
 
 } type;
 
