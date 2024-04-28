@@ -45,7 +45,7 @@ std::variant<int, bool>
 getSymbolValue(const string &name,
                unordered_map<string, std::variant<int, bool>> &symbol_table) {
   if (symbol_table.find(name) == symbol_table.end()) {
-    cout << "error: " << name << " not declared\n";
+    // cout << "error: " << name << " not declared\n";
     return UNDEFINED;
   }
   return symbol_table[name];
@@ -58,7 +58,7 @@ void setSymbolValue(
     unordered_map<string, std::variant<int, bool>> symbol_table) {
   symbol_table[name] = value;
   int x = getIntValue(getSymbolValue(name, symbol_table));
-  cout << "success: " << name << " = " << x << "\n";
+  // cout << "success: " << name << " = " << x << "\n";
 }
 
 void printNode(const node *node, int param = 0) {
@@ -429,7 +429,7 @@ bool getBoolValue(std::variant<int, bool> value) {
 
 void insertNext(node *stmt_list, node *stmt) {
   if (!is_statement(stmt->Type)) {
-    cout << "error: not a statement\n";
+    // cout << "error: not a statement\n";
     return;
   }
   node *temp = stmt_list;
@@ -438,7 +438,7 @@ void insertNext(node *stmt_list, node *stmt) {
   }
   temp->next = stmt;
   // success
-  cout << "success: statement added\n";
+  // cout << "success: statement added\n";
 }
 
 bool is_statement(type value) {
@@ -448,8 +448,8 @@ bool is_statement(type value) {
       value == breakStmt) {
     return true;
   }
+  // cout << "Unknown node type" << value << "\n";
   return false;
-  cout << "Unknown node type" << value << "\n";
 }
 
 int *set_array(string name, int size,
@@ -465,7 +465,7 @@ int *set_array(string name, int size,
 void set_array_element(string name, int index, int value,
                        map<string, pair<int *, int>> array_table) {
   if (array_table.find(name) == array_table.end()) {
-    cout << "Error: array " << name << " not found" << endl;
+    // cout << "Error: array " << name << " not found" << endl;
     return;
   }
   pair<int *, int> p = array_table[name];
@@ -480,7 +480,7 @@ void set_array_element(string name, int index, int value,
 
 int *get_array(string name, map<string, pair<int *, int>> array_table) {
   if (array_table.find(name) == array_table.end()) {
-    cout << "Error: array " << name << " not found" << endl;
+    // cout << "Error: array " << name << " not found" << endl;
     return NULL;
   }
   return array_table[name].first;

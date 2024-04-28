@@ -19,7 +19,7 @@ int *set_array(string name, int size,
 void set_array_element(string name, int index, int value,
                        map<string, pair<int *, int>> array_table) {
   if (array_table.find(name) == array_table.end()) {
-    cout << "Error: array " << name << " not found" << endl;
+    // cout << "Error: array " << name << " not found" << endl;
     return;
   }
   pair<int *, int> p = array_table[name];

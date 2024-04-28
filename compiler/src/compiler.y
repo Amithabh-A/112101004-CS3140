@@ -181,7 +181,7 @@ int *get_array(string name, map<string, pair<int *, int>> array_table) ;
 	stmt_list: statement stmt_list	{
         $$ = $1;
         insertNext($$, $2);
-        cout << "stmt list made. \n";
+        // cout << "stmt list made. \n";
       }
     |
 		|	error ';' 		{ cout<<"error stmt_list\n"; }
