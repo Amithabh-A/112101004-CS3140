@@ -85,6 +85,8 @@ typedef struct node {
   node *body;      // stmt_list
 
   node *returnStmt;
+  int index;
+  node *Var;
 
   //// while stmt
   // node *whilecond;

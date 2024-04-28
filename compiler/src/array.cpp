@@ -6,14 +6,22 @@ using namespace std;
 #define UNDEFINED INT_MAX
 map<string, pair<int *, int>> array_table;
 
-void set_array(string name, pair<int *, int> p) {
+int *set_array(string name, int size,
+               map<string, pair<int *, int>> array_table) {
+  int *arr = new int[size];
+  for (int i = 0; i < size; i++) {
+    arr[i] = NOT_INITIALIZED;
+  }
+  pair<int *, int> p = make_pair(arr, size);
   array_table[name] = p;
   for (int i = 0; i < p.second; i++) {
     p.first[i] = NOT_INITIALIZED;
   }
+  return arr;
 }
 
-void set_array_element(string name, int index, int value) {
+void set_array_element(string name, int index, int value,
+                       map<string, pair<int *, int>> array_table) {
   if (array_table.find(name) == array_table.end()) {
     cout << "Error: array " << name << " not found" << endl;
     return;
@@ -28,7 +36,7 @@ void set_array_element(string name, int index, int value) {
   array_table[name].first[index] = value;
 }
 
-int *get_array(string name) {
+int *get_array(string name, map<string, pair<int *, int>> array_table) {
   if (array_table.find(name) == array_table.end()) {
     cout << "Error: array " << name << " not found" << endl;
     return NULL;
@@ -36,10 +44,11 @@ int *get_array(string name) {
   return array_table[name].first;
 }
 
-int get_array_element(string name, int index) {
+int get_array_element(string name, int index,
+                      map<string, pair<int *, int>> array_table) {
   if (array_table.find(name) == array_table.end()) {
     cout << "Error: array " << name << " not found" << endl;
-    return NOT_INITIALIZED;
+    return UNDEFINED;
   }
   pair<int *, int> p = array_table[name];
   int *array = p.first;
@@ -57,13 +66,17 @@ int get_array_element(string name, int index) {
 }
 
 // int main() {
-//   int a[5];
-//   pair<int *, int> p = make_pair(a, 5);
-//   set_array("a", p);
-//   cout << "hehe? \n";
+//   int *arr = set_array("a", 5);
+//   set_array_element("a", 0, 1);
+//   set_array_element("a", 1, 2);
+//   set_array_element("a", 2, 3);
+//   set_array_element("a", 3, 4);
+//   cout << get_array_element("a", 0) << endl;
+//   cout << get_array_element("a", 1) << endl;
 //   cout << get_array_element("a", 2) << endl;
-//   cout << "hehe !!!\n";
-//   set_array_element("a", 2, 10);
-//   cout << get_array_element("a", 2) << endl;
+//   cout << get_array_element("a", 3) << endl;
+//   cout << get_array_element("a", 4) << endl;
+//   cout << get_array_element("a", 5) << endl;
+//   cout << get_array_element("b", 0) << endl;
 //   return 0;
 // }

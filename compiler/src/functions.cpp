@@ -18,7 +18,7 @@ node *createNode(type Type, std::variant<int, bool> value = UNDEFINED,
                  node *rightTree = NULL, node *next = NULL, node *expr = NULL,
                  node *ifTrue = NULL, node *ifFalse = NULL, node *init = NULL,
                  node *condition = NULL, node *update = NULL, node *body = NULL,
-                 node *returnStmt = NULL) {
+                 node *returnStmt = NULL, int index = UNDEFINED, node *Var) {
   node *newNode = new node();
   newNode->Type = Type;
   newNode->value = value;
@@ -37,6 +37,9 @@ node *createNode(type Type, std::variant<int, bool> value = UNDEFINED,
   newNode->condition = condition;
   newNode->update = update;
   newNode->body = body;
+  newNode->returnStmt = returnStmt;
+  newNode->index = index;
+  newNode->Var = Var;
   return newNode;
 }
 
@@ -148,9 +151,16 @@ void printNode(const node *node, int param = 0) {
     cout << "VAR " << node->name << " ";
     // cout << "</var>\n";
     break;
+  case specialArr:
+    // cout << "<specialArr>\n";
+    cout << "ARRAY " << node->name << "[";
+    printNode(node->Var, param);
+    cout << "] ";
+    // cout << "</specialArr>\n";
+    break;
   case Array:
     // cout << "<Array>\n";
-    cout << "ARRAY " << node->name << "[" << getIntValue(node->value) << "] ";
+    cout << "ARRAY " << node->name << "[" << node->index << "]";
     // cout << "</Array>\n";
     break;
   case writeStmt:

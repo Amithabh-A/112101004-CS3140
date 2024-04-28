@@ -32,7 +32,7 @@ node *createNode(type Type, std::variant<int, bool> value = UNDEFINED,
                  node *rightTree = NULL, node *next = NULL, node *expr = NULL,
                  node *ifTrue = NULL, node *ifFalse = NULL, node *init = NULL,
                  node *condition = NULL, node *update = NULL, node *body = NULL,
-                 node *returnStmt = NULL);
+                 node *returnStmt = NULL, int index = UNDEFINED, node *Var) ;
 
 std::variant<int, bool> getSymbolValue(
     const string &name,
@@ -44,7 +44,7 @@ void printNode(const node *node) ;
 int getIntValue(std::variant<int, bool> value);
 bool getBoolValue(std::variant<int, bool> value);
 
-void set_array(string name, pair<int *, int> p, map<string, pair<int *, int>> array_table) ;
+int *set_array(string name, int size, map<string, pair<int *, int>> array_table);
 void set_array_element(string name, int index, int value, map<string, pair<int *, int>> array_table) ;
 int get_array_element(string name, int index, map<string, pair<int *, int>> array_table) ;
 int *get_array(string name, map<string, pair<int *, int>> array_table) ;
@@ -164,8 +164,10 @@ int *get_array(string name, map<string, pair<int *, int>> array_table) ;
 		|	VAR '[' NUM ']'	
       {                                                   
         // value of the node is the bound of the array. 
-        $$ = createNode(declArray, getIntValue($3->value), $1->name);
-        set_array($1->name, make_pair(new int[getIntValue($3->value)], getIntValue($3->value)), array_table);
+        $$ = createNode(declArray, UNDEFINED, $1->name, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, getIntValue($3->value));
+        set_array($1->name, getIntValue($3->value), array_table);
+        // $$ = createNode(declArray, getIntValue($3->value), $1->name);
+        // set_array($1->name, make_pair(new int[getIntValue($3->value)], getIntValue($3->value)), array_table);
       }
     | error ';' {cout<<"error in Gid\n";}
 
@@ -233,8 +235,8 @@ int *get_array(string name, map<string, pair<int *, int>> array_table) ;
       }
 		|	Wid '[' NUM ']'	
       {
-        $$ = createNode(writeArr, getIntValue($3->value) , $1->name, NULL, $3);
-        get_array_element($1->name, getIntValue($3->value), array_table);
+        // $$ = createNode(writeArr, getIntValue($3->value) , $1->name, NULL, $3);
+        // get_array_element($1->name, getIntValue($3->value), array_table);
       }
     | error ';' {cout<<"error Wid\n";}
 
@@ -319,11 +321,21 @@ int *get_array(string name, map<string, pair<int *, int>> array_table) ;
       {
         $$ = createNode(var, getSymbolValue($1->name, symbol_table), $1->name);
       }
-		|	var_expr '[' expr ']'	// { $$ = createNode(assignArray, getIntValue($3->value), $1->name, NULL, $3);}
+		|	var_expr '[' VAR ']'	// { $$ = createNode(assignArray, getIntValue($3->value), $1->name, NULL, $3);}
       {
-        $$ = createNode(Array, getIntValue($3->value), $1->name);
-        get_array($1->name, array_table);
+        $$ = createNode(specialArr, UNDEFINED, $1->name);
+        $$->Var = $3;
+        $$->index = getSymbolValue($3->name, symbol_table);
       }
+    | var_expr '[' expr ']'
+      {
+        $$ = createNode(Array, UNDEFINED, $1->name);
+        $$->index = $3;
+      }
+      // {
+      //   $$ = createNode(Array, getIntValue($3->value), $1->name);
+      //   get_array($1->name, array_table);
+      // }
     | error ';' {cout<<"error in var_expr\n";}
 		;
 %%
