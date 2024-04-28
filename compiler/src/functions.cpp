@@ -37,6 +37,7 @@ node *createNode(type Type, std::variant<int, bool> value = UNDEFINED,
   newNode->condition = condition;
   newNode->update = update;
   newNode->body = body;
+  newNode->returnStmt = returnStmt;
   return newNode;
 }
 
@@ -113,6 +114,7 @@ void printNode(const node *node, int param = 0) {
   case declArray:
     // cout << "<declArray>\n";
     cout << "ARRAY " << node->name << "[" << getIntValue(node->value) << "] ";
+    // printNode(node->expr, param);
     // cout << "</declArray>\n";
     break;
   case Main:
@@ -150,7 +152,9 @@ void printNode(const node *node, int param = 0) {
     break;
   case Array:
     // cout << "<Array>\n";
-    cout << "ARRAY " << node->name << "[" << getIntValue(node->value) << "] ";
+    cout << "ARRAY " << node->name << "[";
+    printNode(node->expr, param);
+    cout << "] ";
     // cout << "</Array>\n";
     break;
   case writeStmt:
@@ -167,7 +171,9 @@ void printNode(const node *node, int param = 0) {
     break;
   case writeArr:
     // cout << "<writeArr>\n";
-    cout << "ARRAY " << node->name << "[" << getIntValue(node->value) << "] ";
+    cout << "ARRAY " << node->name << "[";
+    printNode(node->expr, param);
+    cout << "] ";
     // cout << "</writeArr>\n";
     break;
   case ifStmt:
@@ -192,16 +198,17 @@ void printNode(const node *node, int param = 0) {
     break;
   case forStmt:
     // cout << "<forStmt>\n";
-    cout << "FOR \n";
+    cout << "\nFOR : \n";
     cout << "INIT ";
     printNode(node->init, param);
-    cout << "CONDITION ";
+    cout << ", CONDITION ";
     printNode(node->condition, param);
+    cout << ", \n";
     cout << "UPDATE ";
     printNode(node->update, param);
     cout << "\n";
     printTree(node->body);
-    cout << "ENDFOR\n";
+    cout << "ENDFOR\n\n";
     // cout << "</forStmt>\n";
     break;
   case constant:
@@ -445,12 +452,14 @@ bool is_statement(type value) {
   cout << "Unknown node type" << value << "\n";
 }
 
-void set_array(string name, pair<int *, int> p,
+int *set_array(string name, int size,
                map<string, pair<int *, int>> array_table) {
+  pair<int *, int> p = make_pair(new int[size], size);
   array_table[name] = p;
   for (int i = 0; i < p.second; i++) {
     p.first[i] = NOT_INITIALIZED;
   }
+  return p.first;
 }
 
 void set_array_element(string name, int index, int value,

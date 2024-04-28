@@ -6,14 +6,18 @@ using namespace std;
 #define UNDEFINED INT_MAX
 map<string, pair<int *, int>> array_table;
 
-void set_array(string name, pair<int *, int> p) {
+int *set_array(string name, int size,
+               map<string, pair<int *, int>> array_table) {
+  pair<int *, int> p = make_pair(new int[size], size);
   array_table[name] = p;
   for (int i = 0; i < p.second; i++) {
     p.first[i] = NOT_INITIALIZED;
   }
+  return p.first;
 }
 
-void set_array_element(string name, int index, int value) {
+void set_array_element(string name, int index, int value,
+                       map<string, pair<int *, int>> array_table) {
   if (array_table.find(name) == array_table.end()) {
     cout << "Error: array " << name << " not found" << endl;
     return;
@@ -28,7 +32,7 @@ void set_array_element(string name, int index, int value) {
   array_table[name].first[index] = value;
 }
 
-int *get_array(string name) {
+int *get_array(string name, map<string, pair<int *, int>> array_table) {
   if (array_table.find(name) == array_table.end()) {
     cout << "Error: array " << name << " not found" << endl;
     return NULL;
@@ -36,7 +40,8 @@ int *get_array(string name) {
   return array_table[name].first;
 }
 
-int get_array_element(string name, int index) {
+int get_array_element(string name, int index,
+                      map<string, pair<int *, int>> array_table) {
   if (array_table.find(name) == array_table.end()) {
     cout << "Error: array " << name << " not found" << endl;
     return NOT_INITIALIZED;

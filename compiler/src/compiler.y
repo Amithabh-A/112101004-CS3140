@@ -44,7 +44,7 @@ void printNode(const node *node) ;
 int getIntValue(std::variant<int, bool> value);
 bool getBoolValue(std::variant<int, bool> value);
 
-void set_array(string name, pair<int *, int> p, map<string, pair<int *, int>> array_table) ;
+int* set_array(string name, int size, map<string, pair<int *, int>> array_table) ;
 void set_array_element(string name, int index, int value, map<string, pair<int *, int>> array_table) ;
 int get_array_element(string name, int index, map<string, pair<int *, int>> array_table) ;
 int *get_array(string name, map<string, pair<int *, int>> array_table) ;
@@ -165,7 +165,8 @@ int *get_array(string name, map<string, pair<int *, int>> array_table) ;
       {                                                   
         // value of the node is the bound of the array. 
         $$ = createNode(declArray, getIntValue($3->value), $1->name);
-        set_array($1->name, make_pair(new int[getIntValue($3->value)], getIntValue($3->value)), array_table);
+        $$->expr = $3;
+        set_array($1->name, getIntValue($3->value), array_table);
       }
     | error ';' {cout<<"error in Gid\n";}
 
@@ -233,8 +234,10 @@ int *get_array(string name, map<string, pair<int *, int>> array_table) ;
       }
 		|	Wid '[' NUM ']'	
       {
-        $$ = createNode(writeArr, getIntValue($3->value) , $1->name, NULL, $3);
-        get_array_element($1->name, getIntValue($3->value), array_table);
+        // $$ = createNode(writeArr, getIntValue($3->value) , $1->name, NULL, $3);
+        // get_array_element($1->name, getIntValue($3->value), array_table);
+        $$ = createNode(writeArr, getIntValue($3->value) , $1->name);
+        $$->expr = $3;
       }
     | error ';' {cout<<"error Wid\n";}
 
@@ -321,7 +324,9 @@ int *get_array(string name, map<string, pair<int *, int>> array_table) ;
       }
 		|	var_expr '[' expr ']'	// { $$ = createNode(assignArray, getIntValue($3->value), $1->name, NULL, $3);}
       {
-        $$ = createNode(Array, getIntValue($3->value), $1->name);
+        // $$ = createNode(Array, getIntValue($3->value), $1->name);
+        $$ = createNode(Array, UNDEFINED, $1->name);
+        $$->expr = $3;
         get_array($1->name, array_table);
       }
     | error ';' {cout<<"error in var_expr\n";}

@@ -3,7 +3,10 @@ BINDIR = /bin
 
 .PHONY: create_bin_dir
 
-all : clear yacc lex compile 
+all : create clear yacc lex compile 
+
+create:
+	mkdir -p bin
 
 clear : 
 	clear
@@ -28,3 +31,4 @@ execute :
 clean : 
 	rm include/compiler.hh src/compiler.cc bin/compiler src/lex.yy.c 
 	rm -rf bin/compiler.dSYM
+	rm -rf bin
