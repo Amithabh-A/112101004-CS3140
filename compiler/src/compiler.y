@@ -23,7 +23,7 @@ map<string, pair<int *, int>> array_table;
 
 void printTree(node *stmt_list);
 void printWholeTree(node* stmt_list);
-void nodeImage(node *node) ;
+void NodeImage(node *node) ;
 bool is_statement(type value);
 void insertNext(node *stmt_list, node *stmt) ;
 
@@ -90,7 +90,11 @@ int *get_array(string name, map<string, pair<int *, int>> array_table) ;
 
 %%
 
-	Prog	:	Gdecl_sec mymain { $$ = createNode(Prog, UNDEFINED, NULL, $1, $2);}
+	Prog	:	Gdecl_sec mymain 
+    { 
+      $$ = createNode(Prog, UNDEFINED, NULL, $1, $2);
+      globalStatementList = $$;
+    }
   | error ';' {cout<<"error in Prog\n";}
   ;
 
@@ -113,8 +117,8 @@ int *get_array(string name, map<string, pair<int *, int>> array_table) ;
 	Gdecl_list: 
 		| 	Gdecl Gdecl_list  // Ddecl == decl_stmt
         {
-          $$ = $1;
-          $$->next = $2;
+          $$ = $1; // Ddecl == decl_stmt
+          insertNext($$, $2);
         }
     | error ';' {cout<<"error in Gdecl_list\n";}
 		;
@@ -175,8 +179,10 @@ int *get_array(string name, map<string, pair<int *, int>> array_table) ;
 			
 	stmt_list: statement stmt_list	{
         $$ = $1;
-        $$->next = $2;
+        insertNext($$, $2);
+        cout << "stmt list made. \n";
       }
+    |
 		|	error ';' 		{ cout<<"error stmt_list\n"; }
 		;
 
@@ -193,7 +199,7 @@ int *get_array(string name, map<string, pair<int *, int>> array_table) ;
       {
         $$ = $1;
       }
-    | break_stmt ';' // { $$ = $1;}
+    | break_stmt ';' { $$ = $1;}
     | error ';' {cout<<"error statement\n";}
 		;
 
@@ -252,7 +258,7 @@ int *get_array(string name, map<string, pair<int *, int>> array_table) ;
         }
     | var_expr T_PLUS_PLUS 
       {
-        $$ = createNode(incStmt, UNDEFINED, NULL, $1);
+        $$ = createNode(incStmt, UNDEFINED, NULL, NULL, $1);
         /*
           write the semantics later. 
           */
@@ -330,7 +336,7 @@ extern int yydebug;
 // yydebug = 1;
 yyparse();
 // cout<<"Size of statement list : "<<statement_list.size()<<"\n";
-// nodeImage(globalStatementList);
+// NodeImage(globalStatementList);
 cout<<"\n\n\nprintTree\n";
 printTree(globalStatementList);
 if(globalStatementList == NULL)cout<<"haha\n root is null\n";
