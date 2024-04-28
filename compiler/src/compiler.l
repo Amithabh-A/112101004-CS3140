@@ -15,6 +15,9 @@ digit	[0-9]
 letter	[a-zA-Z]
 
 %%
+AND {return LOGICAL_AND;}
+OR {return LOGICAL_OR;}
+NOT {return LOGICAL_NOT;}
 decl {
     return  DECL;
 	}
@@ -24,7 +27,6 @@ enddecl {
 integer {
     return T_INT;
   }
-}
 print {
     return WRITE;
   }
@@ -62,7 +64,6 @@ end {
 }
 
 
-}
 {digit}+  { 	
 //             yylval.val = atoi(yytext);
             yylval.Node->value = atoi(yytext);
@@ -78,9 +79,6 @@ end {
 "<=" {return LESSTHANOREQUAL;}
 ">=" {return GREATERTHANOREQUAL;}
 "!=" {return NOTEQUAL;}
-"AND" {return LOGICAL_AND;}
-"OR" {return LOGICAL_OR;}
-"NOT" {return LOGICAL_NOT;}
 "++"  { return T_PLUS_PLUS; }
 [-+*/=()><;,\{\}\[\]\%] { return *yytext; }
 ["]                             { }
@@ -93,5 +91,3 @@ end {
 				}		
 
 %%
-
-

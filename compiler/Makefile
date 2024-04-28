@@ -18,7 +18,7 @@ lex :
 	mv lex.yy.c src/
 
 compile : 
-	clang++ -g -std=c++17 src/lex.yy.c src/compiler.cc src/functions.cpp -o bin/compiler
+	clang++ -g -std=c++17 src/lex.yy.c src/compiler.cc src/functions.cpp -I include/compiler.h -o bin/compiler
 
 run : clear execute
 

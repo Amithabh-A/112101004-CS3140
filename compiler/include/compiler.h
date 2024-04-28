@@ -56,7 +56,7 @@ typedef enum type {
 
   Prog,                 // 40
   declaration_stmtlist, // 41
-  main,                 // 42
+  Main,                 // 42
 
   declVar,   // 43
   declArray, // 44

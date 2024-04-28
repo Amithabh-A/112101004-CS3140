@@ -5,8 +5,10 @@
 #include<string>
 #include<cstring>
 #include<algorithm>
-#include<pair>
-#nclude<vector>
+#include<utility>
+#include<vector>
+#include<map>
+#include<string>
 #include "../include/compiler.h"
 #include <type_traits>
 #define UNDEFINED INT_MAX
@@ -14,10 +16,10 @@
 using namespace std;
 int yylex();
 void yyerror( char* );
-map<string, int*>array_table;
 node *globalStatementList;
 vector<const node*>statement_list; 
 unordered_map<string, std::variant<int, bool>>symbol_table;
+map<string, pair<int *, int>> array_table;
 
 void printTree(node *stmt_list);
 void printWholeTree(node* stmt_list);
@@ -42,8 +44,10 @@ void printNode(const node *node) ;
 int getIntValue(std::variant<int, bool> value);
 bool getBoolValue(std::variant<int, bool> value);
 
-void set_array(string name, pair<int *, int> p) ;
-void set_array_element(string name, int index, int value) ;
+void set_array(string name, pair<int *, int> p, map<string, pair<int *, int>> array_table) ;
+void set_array_element(string name, int index, int value, map<string, pair<int *, int>> array_table) ;
+int get_array_element(string name, int index, map<string, pair<int *, int>> array_table) ;
+int *get_array(string name, map<string, pair<int *, int>> array_table) ;
 
 
 %}
@@ -101,7 +105,7 @@ void set_array_element(string name, int index, int value) ;
       2. return statement - seperate node
 
     */
-    $$ = createNode(main, UNDEFINED, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $2, $3);
+    $$ = createNode(Main, UNDEFINED, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $2, $3);
   }
   | error ';' {cout<<"error in mymain\n";}
   ;
@@ -157,13 +161,16 @@ void set_array_element(string name, int index, int value) ;
       {                                                   
         // value of the node is the bound of the array. 
         $$ = createNode(declArray, getIntValue($3->value), $1->name);
-        set_array($1->name, make_pair(new int[getIntValue($3->value)], getIntValue($3->value)));
+        set_array($1->name, make_pair(new int[getIntValue($3->value)], getIntValue($3->value)), array_table);
       }
     | error ';' {cout<<"error in Gid\n";}
 
 		;
 
-	ret_stmt:	RETURN expr ';'// 	{ $$ = createNode(returnStmt, getIntValue($2->value), NULL, NULL, $2); }
+	ret_stmt:	RETURN expr ';' 
+    {
+      $$ = createNode(returnStmt, UNDEFINED, NULL, NULL, NULL, NULL, $2);
+    }
 		;
 			
 	stmt_list: statement stmt_list	{
@@ -191,13 +198,15 @@ void set_array_element(string name, int index, int value) ;
 		;
 
   break_stmt: BREAK // { $$ = createNode(breakStmt); }
+    {
+      $$ = createNode(breakStmt);
+    }
 
 
   write_stmt: WRITE '(' Wlist ')' 
     {
       $$ = createNode(writeStmt, UNDEFINED, NULL, NULL, $3);
     }
-  | error ';' {cout<<"error write_stmt\n";}
   ;
 
   Wlist : Wid 
@@ -219,7 +228,7 @@ void set_array_element(string name, int index, int value) ;
 		|	Wid '[' NUM ']'	
       {
         $$ = createNode(writeArr, getIntValue($3->value) , $1->name, NULL, $3);
-        get_array_element($1->name, getIntValue($3->value))
+        get_array_element($1->name, getIntValue($3->value), array_table);
       }
     | error ';' {cout<<"error Wid\n";}
 
@@ -227,14 +236,14 @@ void set_array_element(string name, int index, int value) ;
 		
 	assign_stmt:	var_expr '=' expr
         {
-          $$ = creteNode(assignStmt, UNDEFINED, NULL, $1, NULL, NULL, $3);
+          $$ = createNode(assignStmt, UNDEFINED, NULL, $1, NULL, NULL, $3);
           // trying to assign here : 
           // switch($1->Type) {
           //   case var:
           //     setSymbolValue($1->name, $3->value, symbol_table);
           //     break; 
           //   case Array:
-          //     set_array_element($1->name, getIntValue($1->value), getIntValue($3->value));
+          //     set_array_element($1->name, getIntValue($1->value), getIntValue($3->value), array_table);
           //     break;
           //   default:
           //     cout<<"error in assign_stmt\n";
@@ -248,7 +257,10 @@ void set_array_element(string name, int index, int value) ;
           write the semantics later. 
           */
       }
-    | $$ = createNode(nullStmt);
+    | 
+      {
+        $$ = createNode(nullStmt);
+      }
     | error ';' {cout<<"error in assign_stmt\n";}
 		;
 
@@ -265,11 +277,10 @@ void set_array_element(string name, int index, int value) ;
       {
         $$ = createNode(forStmt, UNDEFINED, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $3, $5, $7, $10);
       }
-    | error ';' {cout<<"error in cond_stmt\n";}
 		;
 	
-	expr	:	NUM { $$ = createNode(constant, std::stoi($1));}
-		|	'-' NUM	%prec UMINUS { $$ = createNode(constant, -std::stoi($2));}
+	expr	:	NUM { $$ = createNode(constant, $1->value);}
+		|	'-' NUM	%prec UMINUS { $$ = createNode(constant, -getIntValue($2->value));}
 		|	var_expr {$$ = $1;}
 		|	T			{ 						  	}
 		|	F			{ 	}
@@ -279,7 +290,7 @@ void set_array_element(string name, int index, int value) ;
 		|	expr '*' expr { $$ = createNode(mul, UNDEFINED, NULL, $1, $3);}
 		|	expr '/' expr 
       {
-        $$ = createNode(div, UNDEFINED, NULL, $1, $3);
+        $$ = createNode(Div, UNDEFINED, NULL, $1, $3);
         if(getIntValue($3->value) == 0) {
           cout<<"Division by zero\n";
         } else {
@@ -305,7 +316,7 @@ void set_array_element(string name, int index, int value) ;
 		|	var_expr '[' expr ']'	// { $$ = createNode(assignArray, getIntValue($3->value), $1->name, NULL, $3);}
       {
         $$ = createNode(Array, getIntValue($3->value), $1->name);
-        get_array($1->name);
+        get_array($1->name, array_table);
       }
     | error ';' {cout<<"error in var_expr\n";}
 		;
