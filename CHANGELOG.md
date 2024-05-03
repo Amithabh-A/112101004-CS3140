@@ -1,5 +1,5 @@
-# Test 2
+# Assignment 3
 
-- Done 2nd question.
-- In first question, lex patterns, tokens and rules for "declaration" is done for float
-- Please kindly note that AST is printed in preorder(sorry)
+* Given testcases working
+* whole design is converted to a simple and better design
+* AST printing function rewritten
