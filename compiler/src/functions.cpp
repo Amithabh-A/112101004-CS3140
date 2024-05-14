@@ -1,10 +1,12 @@
 #include "../include/compiler.h"
+#include <climits>
 #include <iostream>
 #include <map>
 #include <string>
 #include <unordered_map>
 #include <variant>
 #include <vector>
+#include <string.h>
 
 #define UNDEFINED INT_MAX
 #define NOT_INITIALIZED INT_MIN
