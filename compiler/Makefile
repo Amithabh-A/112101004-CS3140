@@ -7,6 +7,7 @@ all : create clear yacc lex compile
 
 create:
 	mkdir -p bin
+	rm -f test/codegen.s && touch test/codegen.s
 
 clear : 
 	clear
@@ -25,9 +26,10 @@ compile :
 
 run : clear new_execute
 
+test: clear old_execute
+
 old_execute : 
 	gdb ./bin/compiler 
-	run < test/input.sil > test/output.txt
 
 new_execute:
 	./bin/compiler < test/input.sil > test/output.txt
@@ -36,3 +38,4 @@ clean :
 	rm src/compiler.hh src/compiler.cc bin/compiler src/lex.yy.c 
 	rm -rf bin/compiler.dSYM
 	rm -rf bin
+	rm -rf test/codegen.s

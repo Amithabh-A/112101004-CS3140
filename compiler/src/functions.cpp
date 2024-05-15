@@ -81,7 +81,7 @@ void setSymbolValue(
 }
 
 
-void ProgAssembly() {
+void ProgInitAssembly() {
     string s;
     s = "	.file	1 \"test.c\"";
     writeLine(s);
@@ -101,6 +101,28 @@ void ProgAssembly() {
     writeLine(s);
 }
 
+void ProgEndAssembly() {
+    string s;
+    s = "	jr	$31";
+    writeLine(s);
+    s = "	nop";
+    writeLine(s);
+    s = "";
+    writeLine(s);
+    s = "	.set	macro";
+    writeLine(s);
+    s = " .set	reorder";
+    writeLine(s);
+    s = " .end	main";
+    writeLine(s);
+    s = " .size	main, .-main";
+    writeLine(s);
+    s = "	.ident	\"GCC: (Ubuntu 10.5.0-4ubuntu2) 10.5.0\"";
+    writeLine(s);
+    s = "	.section	.note.GNU-stack,\"\",@progbits";
+    writeLine(s);
+}
+
 void printNode(const node *node, int param = 0) {
   if (node == NULL) {
     cout << "NODE IS NULL\n";
@@ -113,9 +135,10 @@ void printNode(const node *node, int param = 0) {
   switch (node->Type) {
   case Prog:
     // cout << "<Prog>\n";
-    ProgAssembly();
+    ProgInitAssembly();
     printNode(node->lt, param);
     printNode(node->rt, param);
+    ProgEndAssembly();
     // cout << "</Prog>\n";
     break;
   case declaration_stmtlist: // Gdecl_stmt

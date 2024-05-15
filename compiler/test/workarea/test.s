@@ -6,14 +6,6 @@
 	.module	nooddspreg
 	.abicalls
 	.text
-	.globl	a
-	.section	.bss,"aw",@nobits
-	.align	2
-	.type	a, @object
-	.size	a, 4
-a:
-	.space	4
-	.text
 	.align	2
 	.globl	main
 	.set	nomips16
