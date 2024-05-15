@@ -7,11 +7,28 @@
 #include <variant>
 #include <vector>
 #include <string.h>
+#include <fstream>
 
 #define UNDEFINED INT_MAX
 #define NOT_INITIALIZED INT_MIN
 
 using namespace std;
+
+void writeLine(std::string str = "<EMPTY STRING>", const std::string& filePath = "test/codegen.s") {
+    // Open the file in append mode
+    std::ofstream outFile(filePath, std::ios::app);
+    str += "\n";
+
+    if (outFile.is_open()) {
+        // Write the string to the end of the file
+        outFile << str;
+        // Close the file
+        outFile.close();
+    } else {
+        std::cerr << "Unable to open the file: " << filePath << std::endl;
+    }
+}
+
 void printTree(node *stmt_list);
 bool is_statement(type value);
 
@@ -63,6 +80,27 @@ void setSymbolValue(
   // cout << "success: " << name << " = " << x << "\n";
 }
 
+
+void ProgAssembly() {
+    string s;
+    s = "	.file	1 \"test.c\"";
+    writeLine(s);
+    s = "	.section .mdebug.abi32";
+    writeLine(s);
+    s = "	.previous";
+    writeLine(s);
+    s = "	.nan	legacy";
+    writeLine(s);
+    s = "	.module	fp=xx";
+    writeLine(s);
+    s = "	.module	nooddspreg";
+    writeLine(s);
+    s = "	.abicalls";
+    writeLine(s);
+    s = "	.text";
+    writeLine(s);
+}
+
 void printNode(const node *node, int param = 0) {
   if (node == NULL) {
     cout << "NODE IS NULL\n";
@@ -75,11 +113,12 @@ void printNode(const node *node, int param = 0) {
   switch (node->Type) {
   case Prog:
     // cout << "<Prog>\n";
+    ProgAssembly();
     printNode(node->lt, param);
     printNode(node->rt, param);
     // cout << "</Prog>\n";
     break;
-  case declaration_stmtlist:
+  case declaration_stmtlist: // Gdecl_stmt
     // declaration statement list is a statement list .
     // it should be managed by printTree.
     // cout << "<declaration_stmtlist>\n";
@@ -508,15 +547,3 @@ int get_array_element(string name, int index,
   }
   return array_table[name].first[index];
 }
-
-// int main() {
-//   int a[5];
-//   pair<int *, int> p = make_pair(a, 5);
-//   set_array("a", p);
-//   cout << "hehe? \n";
-//   cout << get_array_element("a", 2) << endl;
-//   cout << "hehe !!!\n";
-//   set_array_element("a", 2, 10);
-//   cout << get_array_element("a", 2) << endl;
-//   return 0;
-// }

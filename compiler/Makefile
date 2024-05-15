@@ -23,10 +23,14 @@ lex :
 compile : 
 	g++ -g -std=c++17 src/lex.yy.c src/compiler.cc src/functions.cpp -I include/compiler.h -o bin/compiler
 
-run : clear execute
+run : clear new_execute
 
-execute : 
-	gdb ./bin/compiler
+old_execute : 
+	gdb ./bin/compiler 
+	run < test/input.sil > test/output.txt
+
+new_execute:
+	./bin/compiler < test/input.sil > test/output.txt
 
 clean : 
 	rm src/compiler.hh src/compiler.cc bin/compiler src/lex.yy.c 
