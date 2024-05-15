@@ -1,18 +1,22 @@
+112101004
+Amithabh A
+
 # Abstract Syntax Tree generator
 
-* An AST Generator which takes program statements in c like language and generates Abstract Syntax Tree of the input language
-* Used `lex`, `yacc` and `c++` for parsing and generating AST. 
+- An AST Generator which takes program statements in c like language and generates Abstract Syntax Tree of the input language
+- Used `lex`, `yacc` and `c++` for parsing and generating AST.
 
 # How to run
-* Go to compiler directory
+
+- Go to compiler directory
   ```
   cd compiler
   ```
-* To generate compiler, run
+- To generate compiler, run
   ```
   make
   ```
-* Now, the compiler is generated in `bin/compiler`.
+- Now, the compiler is generated in `bin/compiler`.
   To run compiler.
   ```
   make run
@@ -21,14 +25,16 @@
   ```
   run
   ```
-* Now, give the code in the terminal, and enter `Ctrl-D`. Abstract Syntax Tree will be printed in the terminal.
+- Now, give the code in the terminal, and enter `Ctrl-D`. Abstract Syntax Tree will be printed in the terminal.
 
-# What are there in this repo? 
-* All the relevant codes are in `compiler` directory.
-* Source code for generating compiler can be found in `compiler/src`
-* All header files are in `compiler/include` directory.
+# What are there in this repo?
 
-# Sample Program to run : 
+- All the relevant codes are in `compiler` directory.
+- Source code for generating compiler can be found in `compiler/src`
+- All header files are in `compiler/include` directory.
+
+# Sample Program to run :
+
 ```
 decl
 	integer array[10];

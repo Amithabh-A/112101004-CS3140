@@ -1,4 +1,5 @@
 %{	
+#include <climits>
 #define parse.error verbose
 #define YYDEBUG 1
 #include<iostream>
@@ -11,6 +12,7 @@
 #include<string>
 #include "../include/compiler.h"
 #include <type_traits>
+#include<unordered_map>
 #define UNDEFINED INT_MAX
 #define NOT_INITIALIZED INT_MIN
 using namespace std;

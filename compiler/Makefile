@@ -14,21 +14,25 @@ clear :
 yacc : 
 	bison -d src/compiler.y -o compiler.cc
 	mv compiler.cc src/
-	mv compiler.hh include/
+	mv compiler.hh src/
 
 lex : 
 	flex src/compiler.l 
 	mv lex.yy.c src/
 
 compile : 
-	clang++ -g -std=c++17 src/lex.yy.c src/compiler.cc src/functions.cpp -I include/compiler.h -o bin/compiler
+	g++ -g -std=c++17 src/lex.yy.c src/compiler.cc src/functions.cpp -I include/compiler.h -o bin/compiler
 
-run : clear execute
+run : clear new_execute
 
-execute : 
-	lldb ./bin/compiler
+old_execute : 
+	gdb ./bin/compiler 
+	run < test/input.sil > test/output.txt
+
+new_execute:
+	./bin/compiler < test/input.sil > test/output.txt
 
 clean : 
-	rm include/compiler.hh src/compiler.cc bin/compiler src/lex.yy.c 
+	rm src/compiler.hh src/compiler.cc bin/compiler src/lex.yy.c 
 	rm -rf bin/compiler.dSYM
 	rm -rf bin

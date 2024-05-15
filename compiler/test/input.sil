@@ -1,0 +1,21 @@
+decl
+	integer array[10];
+	integer key;
+	integer mid, temp;
+	integer test,i;
+	integer result;
+  integer start, e;
+enddecl
+
+begin
+  test=0;
+  for(i=0;i<10;i++) {
+		array[test] = test;
+		test = test + 1;
+  }
+	key=array[5];
+  start=1;
+  e=9;
+	print(test);
+	return 0;
+end
